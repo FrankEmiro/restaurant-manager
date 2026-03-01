@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Restaurant Manager</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ─── SIDEBAR ─── -->
+<aside id="sidebar">
+  <div class="logo">
+    <h1>🍽️ Ristorante</h1>
+    <span>Manager</span>
+  </div>
+  <nav>
+    <a data-view="dashboard" class="active">
+      <span class="icon">📊</span>
+      <span>Dashboard</span>
+    </a>
+    <a data-view="cucina">
+      <span class="icon">🍳</span>
+      <span>Cucina</span>
+    </a>
+    <a data-view="mappa">
+      <span class="icon">🗺️</span>
+      <span>Mappa Tavoli</span>
+    </a>
+    <a data-view="editor">
+      <span class="icon">✏️</span>
+      <span>Editor Tavoli</span>
+    </a>
+    <a data-view="menu">
+      <span class="icon">📋</span>
+      <span>Menu</span>
+    </a>
+  </nav>
+  <div class="sidebar-footer">VAPI Ready · v1.0</div>
+</aside>
+
+<!-- ─── MAIN ─── -->
+<main id="main">
+
+  <!-- ══ DASHBOARD ══ -->
+  <section id="view-dashboard" class="view active">
+    <div class="view-header">
+      <h2>Dashboard</h2>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-outline" onclick="openAddReservationModal()">+ Prenotazione</button>
+        <button class="btn btn-primary" onclick="openAddOrderModal()">+ Ordine asporto</button>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card accent">
+        <div class="label">Prenotazioni oggi</div>
+        <div class="value" id="stat-reservations">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Ordini asporto attivi</div>
+        <div class="value" id="stat-orders">—</div>
+      </div>
+      <div class="stat-card success">
+        <div class="label">Tavoli liberi</div>
+        <div class="value" id="stat-tables">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Revenue giornaliero</div>
+        <div class="value" id="stat-revenue">—</div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;flex:1">
+      <div class="card">
+        <div class="card-header">
+          <h3>Prenotazioni di oggi</h3>
+          <button class="btn btn-sm btn-outline" onclick="openAddReservationModal()">+ Aggiungi</button>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Cliente</th>
+                <th>Orario</th>
+                <th>Ospiti</th>
+                <th>Note</th>
+                <th>Stato</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="upcoming-reservations-body">
+              <tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text-muted)">Caricamento...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h3>Ordini asporto di oggi</h3>
+          <button class="btn btn-sm btn-outline" onclick="openAddOrderModal()">+ Aggiungi</button>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Cliente</th>
+                <th>Ritiro</th>
+                <th>Stato</th>
+                <th>Totale</th>
+                <th>Note</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="recent-orders-body">
+              <tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text-muted)">Caricamento...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ CUCINA ══ -->
+  <section id="view-cucina" class="view" style="padding:20px;background:#111827;gap:16px">
+    <div class="view-header">
+      <h2 style="color:white">🍳 Vista Cucina</h2>
+      <div style="display:flex;align-items:center;gap:12px">
+        <span class="kitchen-meta" id="kitchen-last-update"></span>
+        <button class="btn btn-outline" style="color:rgba(255,255,255,0.6);border-color:rgba(255,255,255,0.2)" onclick="renderKitchen()">↻ Aggiorna</button>
+      </div>
+    </div>
+    <div class="kitchen-grid" id="kitchen-grid">
+      <div class="kitchen-empty">Caricamento ordini...</div>
+    </div>
+  </section>
+
+  <!-- ══ MAPPA TAVOLI ══ -->
+  <section id="view-mappa" class="view">
+    <div class="view-header">
+      <h2>Mappa Tavoli</h2>
+      <button class="btn btn-outline" onclick="loadMap()">↻ Aggiorna</button>
+    </div>
+    <div class="table-map-container card">
+      <div class="table-map-area" id="map-area"></div>
+      <div class="map-legend">
+        <div class="legend-item"><div class="legend-dot free"></div> Libero</div>
+        <div class="legend-item"><div class="legend-dot occupied"></div> Occupato</div>
+        <div class="legend-item"><div class="legend-dot reserved"></div> Prenotato</div>
+        <span style="margin-left:auto;font-size:12px;color:var(--text-muted)">Clicca su un tavolo per cambiarne lo stato</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ EDITOR TAVOLI ══ -->
+  <section id="view-editor" class="view">
+    <div class="view-header">
+      <h2>Editor Tavoli</h2>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-primary" onclick="openAddTableModal()">+ Aggiungi tavolo</button>
+      </div>
+    </div>
+
+    <div class="editor-toolbar">
+      <span style="font-size:13px;color:var(--text-muted)">💡 Trascina i tavoli per riposizionarli. Clicca per selezionare e modificare.</span>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 280px;gap:20px;flex:1;min-height:0">
+      <div class="card" style="padding:0;overflow:hidden;display:flex;flex-direction:column">
+        <div class="editor-map-area" id="editor-map-area" style="flex:1"></div>
+      </div>
+
+      <div class="card" id="editor-panel" class="hidden" style="display:none">
+        <div class="card-header"><h3>Modifica tavolo</h3></div>
+        <div class="card-body" style="display:flex;flex-direction:column;gap:16px">
+          <div class="form-group">
+            <label>Nome / Numero</label>
+            <input type="text" id="ep-number" placeholder="es. T1 o Terrazza 1">
+          </div>
+          <div class="form-group">
+            <label>Capacità</label>
+            <input type="number" id="ep-capacity" min="1" max="20" placeholder="Numero di posti">
+          </div>
+          <div class="form-group">
+            <label>Forma</label>
+            <select id="ep-shape">
+              <option value="round">Rotondo</option>
+              <option value="square">Quadrato</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" onclick="saveEditorTable()">Salva modifiche</button>
+          <button class="btn btn-danger" onclick="deleteEditorTable()">Elimina tavolo</button>
+        </div>
+      </div>
+
+      <div class="card" id="editor-no-selection" style="display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:14px">
+        Seleziona un tavolo per modificarlo
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ MENU ══ -->
+  <section id="view-menu" class="view">
+    <div class="view-header">
+      <h2>Menu</h2>
+      <button class="btn btn-primary" onclick="openAddMenuModal()">+ Aggiungi piatto</button>
+    </div>
+
+    <div class="menu-categories" id="menu-categories"></div>
+
+    <div class="menu-grid" id="menu-grid">
+      <div style="text-align:center;padding:48px;color:var(--text-muted)">Caricamento menu...</div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ─── MODALS ─── -->
+
+<!-- Reservation Modal -->
+<div id="modal-reservation" class="modal-backdrop" style="display:none">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="res-modal-title">Nuova prenotazione</h3>
+      <button class="modal-close" onclick="closeModal('modal-reservation')">×</button>
+    </div>
+    <form id="res-form" onsubmit="event.preventDefault(); submitReservation()">
+      <div class="modal-body">
+        <input type="hidden" id="res-id">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nome cliente *</label>
+            <input type="text" id="res-name" required placeholder="Mario Rossi">
+          </div>
+          <div class="form-group">
+            <label>Telefono *</label>
+            <input type="tel" id="res-phone" required placeholder="3331234567">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Data *</label>
+            <input type="date" id="res-date" required>
+          </div>
+          <div class="form-group">
+            <label>Orario *</label>
+            <input type="time" id="res-time" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Numero ospiti *</label>
+            <input type="number" id="res-guests" required min="1" max="50" placeholder="2">
+          </div>
+          <div class="form-group">
+            <label>Tavolo</label>
+            <select id="res-table">
+              <option value="">— Da assegnare —</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Note (allergie, occasioni speciali)</label>
+          <textarea id="res-notes" placeholder="Allergia alle noci..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeModal('modal-reservation')">Annulla</button>
+        <button type="submit" class="btn btn-primary">Salva prenotazione</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Add Table Modal -->
+<div id="modal-add-table" class="modal-backdrop" style="display:none">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Nuovo tavolo</h3>
+      <button class="modal-close" onclick="closeModal('modal-add-table')">×</button>
+    </div>
+    <form id="add-table-form" onsubmit="event.preventDefault(); submitAddTable()">
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Nome / Numero *</label>
+          <input type="text" id="at-number" required placeholder="es. T11 o Terrazza 3">
+        </div>
+        <div class="form-group">
+          <label>Capacità (posti) *</label>
+          <input type="number" id="at-capacity" required min="1" max="30" placeholder="4">
+        </div>
+        <div class="form-group">
+          <label>Forma</label>
+          <select id="at-shape">
+            <option value="round">Rotondo</option>
+            <option value="square">Quadrato</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeModal('modal-add-table')">Annulla</button>
+        <button type="submit" class="btn btn-primary">Aggiungi tavolo</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Menu Item Modal -->
+<div id="modal-menu-item" class="modal-backdrop" style="display:none">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="menu-modal-title">Nuovo piatto</h3>
+      <button class="modal-close" onclick="closeModal('modal-menu-item')">×</button>
+    </div>
+    <form id="menu-item-form" onsubmit="event.preventDefault(); submitMenuItem()">
+      <div class="modal-body">
+        <input type="hidden" id="mi-id">
+        <div class="form-group">
+          <label>Nome piatto *</label>
+          <input type="text" id="mi-name" required placeholder="Spaghetti alla carbonara">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Categoria</label>
+            <select id="mi-category">
+              <option value="Antipasti">Antipasti</option>
+              <option value="Primi">Primi</option>
+              <option value="Secondi">Secondi</option>
+              <option value="Dolci">Dolci</option>
+              <option value="Bevande">Bevande</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Prezzo (€) *</label>
+            <input type="number" id="mi-price" required step="0.5" min="0" placeholder="12.50">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Descrizione</label>
+          <textarea id="mi-description" placeholder="Ricetta tradizionale..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeModal('modal-menu-item')">Annulla</button>
+        <button type="submit" class="btn btn-primary">Salva piatto</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Order Modal -->
+<div id="modal-order" class="modal-backdrop" style="display:none">
+  <div class="modal" style="max-width:580px">
+    <div class="modal-header">
+      <h3>Nuovo ordine asporto</h3>
+      <button class="modal-close" onclick="closeModal('modal-order')">×</button>
+    </div>
+    <form id="order-form" onsubmit="event.preventDefault(); submitOrder()">
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nome cliente *</label>
+            <input type="text" id="ord-name" required placeholder="Lucia Bianchi">
+          </div>
+          <div class="form-group">
+            <label>Telefono *</label>
+            <input type="tel" id="ord-phone" required placeholder="3339876543">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Data ritiro *</label>
+            <input type="date" id="ord-date" required>
+          </div>
+          <div class="form-group">
+            <label>Orario ritiro *</label>
+            <input type="time" id="ord-time" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Note</label>
+          <input type="text" id="ord-notes" placeholder="senza cipolla, allergie...">
+        </div>
+
+        <!-- Item picker -->
+        <div style="border-top:1px solid var(--border);padding-top:16px;margin-top:4px">
+          <div style="font-size:13px;font-weight:600;color:var(--text-muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px">Piatti</div>
+          <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:12px">
+            <div class="form-group" style="flex:1;margin:0">
+              <select id="ord-item-select" style="width:100%">
+                <option value="">— Seleziona piatto —</option>
+              </select>
+            </div>
+            <div class="form-group" style="width:80px;margin:0">
+              <input type="number" id="ord-item-qty" value="1" min="1" max="99" style="text-align:center">
+            </div>
+            <button type="button" class="btn btn-outline" onclick="addOrderItem()" style="white-space:nowrap">+ Aggiungi</button>
+          </div>
+          <div id="ord-items-list" style="display:flex;flex-direction:column;gap:6px;min-height:40px"></div>
+          <div style="display:flex;justify-content:flex-end;margin-top:12px;padding-top:10px;border-top:1px solid var(--border)">
+            <span style="font-size:15px;color:var(--text-muted);margin-right:8px">Totale:</span>
+            <span id="ord-total" style="font-size:18px;font-weight:700;color:var(--accent)">€0.00</span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeModal('modal-order')">Annulla</button>
+        <button type="submit" class="btn btn-primary">Crea ordine</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div id="toast-container"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
