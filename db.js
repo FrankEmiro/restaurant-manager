@@ -1,7 +1,11 @@
 const { DatabaseSync } = require('node:sqlite');
 const path = require('path');
+const fs = require('fs');
 
-const db = new DatabaseSync(path.join(__dirname, 'restaurant.db'));
+const DB_PATH = process.env.DB_PATH || path.join(__dirname, 'restaurant.db');
+fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
+
+const db = new DatabaseSync(DB_PATH);
 
 // Enable WAL mode and foreign keys
 db.exec('PRAGMA journal_mode = WAL');
