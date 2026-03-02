@@ -37,28 +37,22 @@ function vapiMiddleware(req, res, next) {
   let vapiParams = {};
 
   // VAPI production format: message.toolCallList
+  // NOTE: VAPI sends arguments as already-parsed object (not JSON string)
   const toolCallList = req.body?.message?.toolCallList;
   if (Array.isArray(toolCallList) && toolCallList.length > 0) {
     const call = toolCallList[0];
     toolCallId = call.id || 'unknown';
     const rawArgs = call.function?.arguments;
-    console.log('[VAPI HANDLER] branch=toolCallList, rawArgs type:', typeof rawArgs);
-    console.log('[VAPI HANDLER] rawArgs:', rawArgs);
     try {
       vapiParams = typeof rawArgs === 'string' ? JSON.parse(rawArgs) : (rawArgs || {});
     } catch (e) {
-      console.log('[VAPI HANDLER] JSON.parse error:', e.message);
       vapiParams = {};
     }
   } else {
     // Fallback for direct testing (body contains params directly)
-    console.log('[VAPI HANDLER] branch=fallback');
     toolCallId = req.body?.toolCallId || req.body?.id || 'unknown';
     vapiParams = req.body?.parameters || req.body || {};
   }
-
-  console.log('[VAPI HANDLER] toolCallId:', toolCallId);
-  console.log('[VAPI HANDLER] vapiParams:', JSON.stringify(vapiParams));
 
   req.toolCallId = toolCallId;
   req.vapiParams = vapiParams;

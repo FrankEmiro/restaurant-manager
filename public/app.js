@@ -220,7 +220,7 @@ async function loadKitchen() {
 
 async function renderKitchen() {
   try {
-    const orders = await apiFetch(`/api/orders?date=${today()}`);
+    const orders = await apiFetch(`/api/orders`);
     const active = orders.filter(o => ['pending', 'preparing', 'ready'].includes(o.status));
     const grid = document.getElementById('kitchen-grid');
 
