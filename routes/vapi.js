@@ -129,7 +129,7 @@ router.post('/orders/create', vapiMiddleware, (req, res) => {
 router.post('/menu', vapiMiddleware, (req, res) => {
   try {
     const { category } = req.vapiParams;
-    let query = 'SELECT name, category, price, description FROM menu_items WHERE available = 1';
+    let query = 'SELECT id, name, category, price FROM menu_items WHERE available = 1';
     const params = [];
     if (category) {
       query += ' AND category = ?';
@@ -145,7 +145,7 @@ router.post('/menu', vapiMiddleware, (req, res) => {
     const grouped = {};
     for (const item of items) {
       if (!grouped[item.category]) grouped[item.category] = [];
-      grouped[item.category].push(`${item.name} €${item.price.toFixed(2)}`);
+      grouped[item.category].push(`${item.name} (id:${item.id}) €${item.price.toFixed(2)}`);
     }
     const menuText = Object.entries(grouped)
       .map(([cat, list]) => `${cat}: ${list.join(', ')}`)
