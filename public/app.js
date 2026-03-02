@@ -71,6 +71,22 @@ function countdownLabel(pickupDate, pickupTime) {
 const views = ['dashboard', 'cucina', 'mappa', 'editor', 'menu'];
 let activeView = 'dashboard';
 
+// ─── AUTO-REFRESH ────────────────────────────────
+let _pollInterval = null;
+const POLL_INTERVALS = { dashboard: 15000, cucina: 10000, mappa: 20000 };
+
+function startPolling(view) {
+  stopPolling();
+  const ms = POLL_INTERVALS[view];
+  if (!ms) return;
+  _pollInterval = setInterval(() => loadView(view), ms);
+}
+
+function stopPolling() {
+  if (_pollInterval) { clearInterval(_pollInterval); _pollInterval = null; }
+}
+// ─────────────────────────────────────────────────
+
 function navigate(view) {
   activeView = view;
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
@@ -80,6 +96,7 @@ function navigate(view) {
   const link = document.querySelector(`[data-view="${view}"]`);
   if (link) link.classList.add('active');
   loadView(view);
+  startPolling(view);
 }
 
 function loadView(view) {
@@ -210,12 +227,8 @@ async function deleteOrder(id) {
 
 // ─── CUCINA ─────────────────────────────────────
 
-let kitchenInterval = null;
-
 async function loadKitchen() {
-  clearInterval(kitchenInterval);
   await renderKitchen();
-  kitchenInterval = setInterval(renderKitchen, 15000);
 }
 
 async function renderKitchen() {
