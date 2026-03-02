@@ -7,18 +7,25 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ─── DEBUG LOGGER (solo per /vapi/*) ─────────────────────────────────────────
-app.use('/vapi', (req, res, next) => {
-  const ts = new Date().toISOString();
-  console.log(`\n${'─'.repeat(60)}`);
-  console.log(`[VAPI] ${ts}`);
-  console.log(`[VAPI] ${req.method} ${req.originalUrl}`);
-  console.log(`[VAPI] BODY:\n${JSON.stringify(req.body, null, 2)}`);
+// ─── DEBUG LOGGER (tutte le chiamate API) ────────────────────────────────────
+app.use((req, res, next) => {
+  // Salta i file statici
+  if (req.path.startsWith('/public') || req.path === '/favicon.ico' || (!req.path.startsWith('/api') && !req.path.startsWith('/vapi'))) {
+    return next();
+  }
 
-  // Log anche la risposta
+  const ts = new Date().toISOString();
+  const prefix = req.path.startsWith('/vapi') ? 'VAPI' : 'API';
+  console.log(`\n${'─'.repeat(60)}`);
+  console.log(`[${prefix}] ${ts}`);
+  console.log(`[${prefix}] ${req.method} ${req.originalUrl}`);
+  if (Object.keys(req.body || {}).length > 0) {
+    console.log(`[${prefix}] BODY:\n${JSON.stringify(req.body, null, 2)}`);
+  }
+
   const originalJson = res.json.bind(res);
   res.json = (data) => {
-    console.log(`[VAPI] RESPONSE:\n${JSON.stringify(data, null, 2)}`);
+    console.log(`[${prefix}] RESPONSE:\n${JSON.stringify(data, null, 2)}`);
     console.log(`${'─'.repeat(60)}\n`);
     return originalJson(data);
   };
