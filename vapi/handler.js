@@ -1,57 +1,62 @@
 /**
  * VAPI Response Handler
  *
- * Wraps responses in the VAPI-required format:
- * { results: [{ toolCallId, result|error }] }
+ * VAPI sends tool calls as POST with this body:
+ * {
+ *   "message": {
+ *     "type": "tool-calls",
+ *     "toolCallList": [
+ *       {
+ *         "id": "call_xxx",
+ *         "type": "function",
+ *         "function": {
+ *           "name": "create_reservation",
+ *           "arguments": "{\"customer_name\": \"Mario\"}"  ← JSON string
+ *         }
+ *       }
+ *     ]
+ *   }
+ * }
  *
- * Rules:
- * - Always HTTP 200
- * - result/error are always strings (no objects/arrays)
- * - No \n in strings (replaced with ", ")
- * - toolCallId matches the request
+ * Response must always be HTTP 200:
+ * { "results": [{ "toolCallId": "call_xxx", "result": "..." }] }
  */
 
 function vapiSuccess(toolCallId, message) {
   const result = String(message).replace(/\n/g, ', ').trim();
-  return {
-    results: [{ toolCallId, result }]
-  };
+  return { results: [{ toolCallId, result }] };
 }
 
 function vapiError(toolCallId, message) {
   const error = String(message).replace(/\n/g, ', ').trim();
-  return {
-    results: [{ toolCallId, error }]
-  };
+  return { results: [{ toolCallId, error }] };
 }
 
-/**
- * Middleware factory for VAPI endpoints.
- * Usage: router.post('/path', vapiMiddleware, handler)
- *
- * The handler receives (req, res) where:
- * - req.toolCallId is extracted
- * - req.vapiParams is req.body.parameters (or req.body if no parameters key)
- * - res.vapiSuccess(msg) sends 200 with success format
- * - res.vapiError(msg) sends 200 with error format
- */
 function vapiMiddleware(req, res, next) {
-  // Extract toolCallId from various VAPI body formats
-  const toolCallId = req.body?.toolCallId
-    || req.body?.tool_call_id
-    || req.body?.id
-    || 'unknown';
+  let toolCallId = 'unknown';
+  let vapiParams = {};
+
+  // VAPI production format
+  const toolCallList = req.body?.message?.toolCallList;
+  if (Array.isArray(toolCallList) && toolCallList.length > 0) {
+    const call = toolCallList[0];
+    toolCallId = call.id || 'unknown';
+    try {
+      vapiParams = JSON.parse(call.function?.arguments || '{}');
+    } catch {
+      vapiParams = {};
+    }
+  } else {
+    // Fallback for direct testing (body contains params directly)
+    toolCallId = req.body?.toolCallId || req.body?.id || 'unknown';
+    vapiParams = req.body?.parameters || req.body || {};
+  }
 
   req.toolCallId = toolCallId;
-  req.vapiParams = req.body?.parameters || req.body;
+  req.vapiParams = vapiParams;
 
-  res.vapiSuccess = (message) => {
-    res.status(200).json(vapiSuccess(toolCallId, message));
-  };
-
-  res.vapiError = (message) => {
-    res.status(200).json(vapiError(toolCallId, message));
-  };
+  res.vapiSuccess = (message) => res.status(200).json(vapiSuccess(toolCallId, message));
+  res.vapiError   = (message) => res.status(200).json(vapiError(toolCallId, message));
 
   next();
 }

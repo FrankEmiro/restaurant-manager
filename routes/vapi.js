@@ -125,10 +125,10 @@ router.post('/orders/create', vapiMiddleware, (req, res) => {
   }
 });
 
-// GET /vapi/menu
-router.get('/menu', vapiMiddleware, (req, res) => {
+// POST /vapi/menu  (VAPI always POSTs — params come from body via vapiMiddleware)
+router.post('/menu', vapiMiddleware, (req, res) => {
   try {
-    const { category } = req.query;
+    const { category } = req.vapiParams;
     let query = 'SELECT name, category, price, description FROM menu_items WHERE available = 1';
     const params = [];
     if (category) {
@@ -157,10 +157,10 @@ router.get('/menu', vapiMiddleware, (req, res) => {
   }
 });
 
-// GET /vapi/availability
-router.get('/availability', vapiMiddleware, (req, res) => {
+// POST /vapi/availability  (VAPI always POSTs — params come from body via vapiMiddleware)
+router.post('/availability', vapiMiddleware, (req, res) => {
   try {
-    const { date, time, guests } = req.query;
+    const { date, time, guests } = req.vapiParams;
     if (!date) {
       return res.vapiError('Specifica una data (YYYY-MM-DD) per verificare la disponibilità.');
     }
