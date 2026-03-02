@@ -16,10 +16,11 @@ function getOrderWithItems(id) {
 
 // GET /api/orders
 router.get('/', (req, res) => {
-  const { date, status } = req.query;
+  const { date, from, status } = req.query;
   let query = 'SELECT * FROM takeaway_orders WHERE 1=1';
   const params = [];
   if (date) { query += ' AND pickup_date = ?'; params.push(date); }
+  if (from) { query += ' AND pickup_date >= ?'; params.push(from); }
   if (status) { query += ' AND status = ?'; params.push(status); }
   query += ' ORDER BY pickup_date, pickup_time';
   const orders = db.prepare(query).all(...params);

@@ -99,7 +99,7 @@ async function loadDashboard() {
     const [data, reservations, orders] = await Promise.all([
       apiFetch('/api/dashboard'),
       apiFetch(`/api/reservations?date=${today()}`),
-      apiFetch(`/api/orders?date=${today()}`),
+      apiFetch(`/api/orders?from=${today()}`),
     ]);
     const s = data.stats;
 
