@@ -4,6 +4,20 @@
 
 const API = '';  // same origin
 
+// ─── AUTH ────────────────────────────────────────
+
+async function logout() {
+  await fetch('/api/auth/logout', { method: 'POST' });
+  window.location.href = '/login';
+}
+
+// Intercept 401 → redirect to login
+window.addEventListener('unhandledrejection', e => {
+  if (e.reason?.message === 'Non autenticato') {
+    window.location.href = '/login';
+  }
+});
+
 // ─── UTILITY ────────────────────────────────────
 
 async function apiFetch(path, opts = {}) {

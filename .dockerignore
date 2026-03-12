@@ -2,6 +2,6 @@ node_modules/
 *.db
 *.db-shm
 *.db-wal
-*.log
-.env
+server.log
+.git
 .claude/

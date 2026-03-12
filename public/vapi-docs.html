@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VAPI Docs — Ristorante Manager</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #0f1117; color: #e2e8f0; display: flex; min-height: 100vh; }
+
+    /* Sidebar */
+    aside { width: 240px; background: #1a1d2e; border-right: 1px solid #2e3250; padding: 24px 0; position: fixed; top: 0; bottom: 0; overflow-y: auto; }
+    .aside-logo { padding: 0 20px 20px; border-bottom: 1px solid #2e3250; margin-bottom: 16px; }
+    .aside-logo h1 { font-size: 15px; color: #e2e8f0; }
+    .aside-logo p { font-size: 11px; color: #64748b; margin-top: 2px; }
+    .toc-section { padding: 6px 20px; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #4f6ef7; font-weight: 700; margin-top: 12px; }
+    aside a { display: block; padding: 6px 20px; font-size: 13px; color: #94a3b8; text-decoration: none; }
+    aside a:hover { color: #e2e8f0; background: rgba(255,255,255,0.04); }
+
+    /* Main */
+    main { margin-left: 240px; padding: 40px 48px; max-width: 900px; width: 100%; }
+    h1 { font-size: 28px; margin-bottom: 8px; }
+    h2 { font-size: 20px; margin: 40px 0 16px; color: #e2e8f0; padding-top: 16px; border-top: 1px solid #2e3250; }
+    h3 { font-size: 15px; color: #94a3b8; margin: 24px 0 10px; }
+    p { font-size: 14px; color: #94a3b8; line-height: 1.6; margin-bottom: 12px; }
+    .subtitle { font-size: 15px; color: #64748b; margin-bottom: 32px; }
+
+    /* Endpoint badges */
+    .endpoint { display: inline-flex; align-items: center; gap: 8px; background: #1e2235; border: 1px solid #2e3250; border-radius: 8px; padding: 8px 14px; margin-bottom: 8px; font-size: 13px; font-family: monospace; }
+    .method { background: #7c3aed; color: white; border-radius: 4px; padding: 2px 7px; font-size: 11px; font-weight: 700; }
+    .method.get { background: #059669; }
+
+    /* Code blocks */
+    .code-wrap { position: relative; margin: 12px 0 24px; }
+    pre { background: #1e2235; border: 1px solid #2e3250; border-radius: 10px; padding: 20px; font-size: 12.5px; line-height: 1.6; overflow-x: auto; color: #e2e8f0; white-space: pre-wrap; word-break: break-word; }
+    .copy-btn { position: absolute; top: 10px; right: 10px; border: none; border-radius: 6px; padding: 5px 12px; font-size: 12px; cursor: pointer; font-weight: 600; }
+    .copy-btn.blue  { background: #4f6ef7; color: #fff; }
+    .copy-btn.purple { background: #7c3aed; color: #fff; }
+
+    /* Alert */
+    .alert { border-radius: 10px; padding: 16px 20px; font-size: 13px; line-height: 1.7; margin: 20px 0; }
+    .alert-info    { background: rgba(79,110,247,0.12); border: 1px solid rgba(79,110,247,0.3); color: #93c5fd; }
+    .alert-success { background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.3); color: #6ee7b7; }
+
+    /* Tool list */
+    .tool-card { background: #1a1d2e; border: 1px solid #2e3250; border-radius: 10px; padding: 16px 20px; margin-bottom: 12px; }
+    .tool-name { font-size: 14px; font-weight: 700; font-family: monospace; color: #a78bfa; }
+    .tool-desc { font-size: 13px; color: #94a3b8; margin-top: 4px; }
+  </style>
+</head>
+<body>
+
+<aside>
+  <div class="aside-logo">
+    <h1>🍽️ Ristorante Manager</h1>
+    <p>VAPI Documentation</p>
+  </div>
+  <div class="toc-section">Panoramica</div>
+  <a href="#overview">Come funziona</a>
+  <a href="#endpoints">Endpoint disponibili</a>
+  <div class="toc-section">VAPI Composer</div>
+  <a href="#vapi-composer">System Prompt</a>
+  <a href="#vapi-tools-json">Tools JSON</a>
+  <div class="toc-section">Tool Reference</div>
+  <a href="#tool-reservation-create">create_reservation</a>
+  <a href="#tool-reservation-cancel">cancel_reservation</a>
+  <a href="#tool-order-create">create_order</a>
+  <a href="#tool-menu">get_menu</a>
+  <a href="#tool-availability">check_availability</a>
+</aside>
+
+<main>
+  <h1>VAPI Integration Docs</h1>
+  <p class="subtitle">Configurazione dell'agente vocale per il Ristorante Manager</p>
+
+  <!-- OVERVIEW -->
+  <h2 id="overview">Come funziona</h2>
+  <p>L'agente vocale VAPI risponde alle telefonate dei clienti e chiama questi endpoint per creare prenotazioni, ordini asporto e consultare il menu in tempo reale.</p>
+  <div class="alert alert-info">
+    <strong>Nota:</strong> Gli endpoint <code>/vapi/*</code> sono sempre pubblici (no autenticazione). Le chiamate arrivano dai server VAPI, non da browser.
+  </div>
+
+  <!-- ENDPOINTS -->
+  <h2 id="endpoints">Endpoint disponibili</h2>
+  <div class="endpoint"><span class="method">POST</span>/vapi/reservations/create</div><br>
+  <div class="endpoint"><span class="method">POST</span>/vapi/reservations/cancel</div><br>
+  <div class="endpoint"><span class="method">POST</span>/vapi/orders/create</div><br>
+  <div class="endpoint"><span class="method">POST</span>/vapi/menu</div><br>
+  <div class="endpoint"><span class="method">POST</span>/vapi/availability</div>
+
+  <!-- VAPI COMPOSER — SYSTEM PROMPT -->
+  <h2 id="vapi-composer">🤖 VAPI Composer — System Prompt</h2>
+  <p>Copia e incolla nel campo <strong>System Prompt</strong> del tuo assistente VAPI.</p>
+  <div class="code-wrap">
+    <button class="copy-btn blue" onclick="copyText('prompt-template')">📋 Copia</button>
+    <pre id="prompt-template">Sei l'assistente vocale del ristorante.
+Il tuo compito è rispondere alle telefonate dei clienti in modo professionale, cordiale e conciso.
+
+## CHI SEI
+- Assistente vocale del ristorante
+- Gestisci: prenotazioni tavoli, ordini asporto, consulta menu e disponibilità
+- Parli sempre in italiano, tono professionale ma caldo e disponibile
+
+## ALL'INIZIO DI OGNI TELEFONATA
+1. Saluta e presentati: "Buongiorno, sono l'assistente vocale del ristorante, come posso aiutarla?"
+2. Aspetta che il cliente esprima la sua esigenza prima di procedere
+
+## COSA PUOI FARE
+Usa i tool disponibili per:
+
+- **Verificare disponibilità tavoli** → tool `check_availability`
+  Quando il cliente chiede se c'è posto per una certa data, orario e numero di persone
+
+- **Creare una prenotazione** → tool `create_reservation`
+  Quando il cliente vuole prenotare un tavolo. Raccogli: nome, telefono, data, orario, numero ospiti, eventuali note
+
+- **Cancellare una prenotazione** → tool `cancel_reservation`
+  Quando il cliente vuole disdire. Chiedi: nome, data della prenotazione (o ID se lo conosce)
+
+- **Consultare il menu** → tool `get_menu`
+  Quando il cliente chiede cosa c'è nel menu, i prezzi o piatti di una categoria specifica
+
+- **Ordinare asporto** → tool `create_order`
+  Quando il cliente vuole ordinare da asporto. Raccogli: nome, telefono, data e orario ritiro, piatti e quantità
+
+## REGOLE DI COMPORTAMENTO
+- Sii breve nelle risposte vocali: massimo 2-3 frasi
+- Non inventare mai informazioni: usa sempre i tool per dati reali
+- Per le date usa il formato YYYY-MM-DD (es. 2026-03-20), per gli orari HH:MM (es. 20:30)
+- Se la richiesta non rientra nelle tue competenze, di': "La passo al nostro staff, la ricontatteremo al più presto"
+- Non fornire dati personali di altri clienti
+
+## FORMATO RISPOSTE
+- Parla in modo naturale, non elencare dati tecnici
+- Conferma sempre l'azione: "Ho registrato la sua prenotazione...", "L'ordine è confermato..."
+- Concludi sempre chiedendo: "Posso aiutarla con altro?"</pre>
+  </div>
+
+  <!-- VAPI COMPOSER — TOOLS JSON -->
+  <h2 id="vapi-tools-json">🔧 Tools JSON — Configurazione completa</h2>
+  <p>Copia e incolla nella sezione <strong>Tools</strong> del tuo assistente VAPI (modalità JSON raw).</p>
+  <p>Sostituisci <code>TUO-DOMINIO</code> con il tuo URL pubblico (es. <code>restaurant.example.com</code>).</p>
+  <div class="code-wrap">
+    <button class="copy-btn purple" onclick="copyText('tools-json')">📋 Copia</button>
+    <pre id="tools-json">[
+  {
+    "type": "function",
+    "function": {
+      "name": "check_availability",
+      "description": "Verifica la disponibilità di tavoli per una data, orario e numero di persone. Usare quando il cliente chiede se c'è posto o prima di procedere con una prenotazione.",
+      "url": "https://TUO-DOMINIO/vapi/availability",
+      "method": "POST",
+      "parameters": {
+        "type": "object",
+        "required": ["date"],
+        "properties": {
+          "date":   { "type": "string",  "description": "Data in formato YYYY-MM-DD" },
+          "time":   { "type": "string",  "description": "Orario in formato HH:MM" },
+          "guests": { "type": "integer", "description": "Numero di persone" }
+        }
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "create_reservation",
+      "description": "Crea una prenotazione tavolo. Usare quando il cliente vuole prenotare e ha fornito nome, telefono, data, orario e numero ospiti.",
+      "url": "https://TUO-DOMINIO/vapi/reservations/create",
+      "method": "POST",
+      "parameters": {
+        "type": "object",
+        "required": ["customer_name", "customer_phone", "date", "time", "guests"],
+        "properties": {
+          "customer_name":  { "type": "string",  "description": "Nome e cognome del cliente" },
+          "customer_phone": { "type": "string",  "description": "Numero di telefono del cliente" },
+          "date":           { "type": "string",  "description": "Data prenotazione in formato YYYY-MM-DD" },
+          "time":           { "type": "string",  "description": "Orario in formato HH:MM (es. 20:30)" },
+          "guests":         { "type": "integer", "description": "Numero di ospiti" },
+          "notes":          { "type": "string",  "description": "Note opzionali: allergie, occasioni speciali, richieste particolari" }
+        }
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "cancel_reservation",
+      "description": "Cancella una prenotazione esistente. Usare quando il cliente vuole disdire. Identificare la prenotazione tramite ID, oppure nome+data o telefono+data.",
+      "url": "https://TUO-DOMINIO/vapi/reservations/cancel",
+      "method": "POST",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "reservation_id":  { "type": "integer", "description": "ID della prenotazione (se noto)" },
+          "customer_name":   { "type": "string",  "description": "Nome del cliente" },
+          "customer_phone":  { "type": "string",  "description": "Telefono del cliente" },
+          "date":            { "type": "string",  "description": "Data della prenotazione in formato YYYY-MM-DD" }
+        }
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "get_menu",
+      "description": "Restituisce i piatti disponibili del menu, con prezzi. Usare quando il cliente chiede cosa c'è nel menu o vuole conoscere i piatti di una categoria.",
+      "url": "https://TUO-DOMINIO/vapi/menu",
+      "method": "POST",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "string",
+            "description": "Categoria opzionale per filtrare",
+            "enum": ["Antipasti", "Primi", "Secondi", "Dolci", "Bevande"]
+          }
+        }
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "create_order",
+      "description": "Crea un ordine asporto. Usare quando il cliente vuole ordinare da asporto e ha fornito nome, telefono, orario di ritiro e i piatti desiderati con le quantità.",
+      "url": "https://TUO-DOMINIO/vapi/orders/create",
+      "method": "POST",
+      "parameters": {
+        "type": "object",
+        "required": ["customer_name", "customer_phone", "pickup_date", "pickup_time", "items"],
+        "properties": {
+          "customer_name":  { "type": "string",  "description": "Nome e cognome del cliente" },
+          "customer_phone": { "type": "string",  "description": "Numero di telefono" },
+          "pickup_date":    { "type": "string",  "description": "Data di ritiro in formato YYYY-MM-DD" },
+          "pickup_time":    { "type": "string",  "description": "Orario di ritiro in formato HH:MM" },
+          "notes":          { "type": "string",  "description": "Note: allergie, modifiche ai piatti" },
+          "items": {
+            "type": "array",
+            "description": "Lista dei piatti ordinati",
+            "items": {
+              "type": "object",
+              "required": ["menu_item_id", "quantity"],
+              "properties": {
+                "menu_item_id": { "type": "integer", "description": "ID del piatto (ottenuto da get_menu)" },
+                "quantity":     { "type": "integer", "description": "Quantità" }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+]</pre>
+  </div>
+
+  <div class="alert alert-success">
+    <strong>Come configurare in VAPI Composer:</strong><br>
+    1. Vai su <strong>dashboard.vapi.ai</strong> → Assistants → Create (o apri il tuo assistente)<br>
+    2. Incolla il <strong>System Prompt</strong> nel campo apposito<br>
+    3. Nella sezione <strong>Tools</strong>, incolla il JSON completo in modalità raw<br>
+    4. Imposta <strong>First Message</strong>: "Buongiorno, sono l'assistente vocale del ristorante. Come posso aiutarla?"<br>
+    5. Testa con il simulatore integrato di VAPI
+  </div>
+
+  <!-- TOOL REFERENCE -->
+  <h2>📖 Tool Reference</h2>
+
+  <h3 id="tool-reservation-create">create_reservation</h3>
+  <div class="tool-card">
+    <div class="tool-name">POST /vapi/reservations/create</div>
+    <div class="tool-desc">Crea una nuova prenotazione. Campi obbligatori: customer_name, customer_phone, date (YYYY-MM-DD), time (HH:MM), guests.</div>
+  </div>
+
+  <h3 id="tool-reservation-cancel">cancel_reservation</h3>
+  <div class="tool-card">
+    <div class="tool-name">POST /vapi/reservations/cancel</div>
+    <div class="tool-desc">Cancella una prenotazione. Identificazione tramite reservation_id, oppure customer_phone+date, oppure customer_name+date.</div>
+  </div>
+
+  <h3 id="tool-order-create">create_order</h3>
+  <div class="tool-card">
+    <div class="tool-name">POST /vapi/orders/create</div>
+    <div class="tool-desc">Crea un ordine asporto con lista piatti. Usa gli ID piatto ottenuti da get_menu. Calcola il totale automaticamente.</div>
+  </div>
+
+  <h3 id="tool-menu">get_menu</h3>
+  <div class="tool-card">
+    <div class="tool-name">POST /vapi/menu</div>
+    <div class="tool-desc">Restituisce tutti i piatti disponibili (available=1), opzionalmente filtrati per categoria. Include ID, nome e prezzo.</div>
+  </div>
+
+  <h3 id="tool-availability">check_availability</h3>
+  <div class="tool-card">
+    <div class="tool-name">POST /vapi/availability</div>
+    <div class="tool-desc">Verifica tavoli liberi per una data. Opzionalmente filtra per orario e numero ospiti minimi.</div>
+  </div>
+
+</main>
+
+<script>
+  function copyText(id) {
+    navigator.clipboard.writeText(document.getElementById(id).textContent.trim()).then(() => {
+      const btn = event.target;
+      const orig = btn.textContent;
+      btn.textContent = '✓ Copiato!';
+      setTimeout(() => btn.textContent = orig, 2000);
+    });
+  }
+</script>
+</body>
+</html>
