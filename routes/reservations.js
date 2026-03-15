@@ -4,17 +4,17 @@ const db = require('../db');
 
 // GET /api/reservations
 router.get('/', (req, res) => {
-  const { date } = req.query;
+  const { date, from, to } = req.query;
   let query = `
     SELECT r.*, t.number as table_number, t.capacity as table_capacity
     FROM reservations r
     LEFT JOIN tables t ON r.table_id = t.id
+    WHERE 1=1
   `;
   const params = [];
-  if (date) {
-    query += ' WHERE r.date = ?';
-    params.push(date);
-  }
+  if (date) { query += ' AND r.date = ?'; params.push(date); }
+  if (from) { query += ' AND r.date >= ?'; params.push(from); }
+  if (to)   { query += ' AND r.date <= ?'; params.push(to); }
   query += ' ORDER BY r.date, r.time';
   const rows = db.prepare(query).all(...params);
   res.json(rows);

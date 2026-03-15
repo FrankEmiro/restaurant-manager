@@ -744,6 +744,40 @@ textarea { resize: vertical; min-height: 80px; }
 /* ─── TABLE ACTION BUTTONS ─── */
 .row-actions { display: flex; gap: 4px; }
 
+/* ─── AGENDA ─── */
+.agenda-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 20px;
+  border-bottom: 2px solid var(--border);
+  padding-bottom: 0;
+}
+.agenda-tab {
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+.agenda-tab:hover { color: var(--text-primary); }
+.agenda-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+.agenda-panel { display: flex; flex-direction: column; gap: 16px; }
+.agenda-filters {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+  background: white;
+  padding: 16px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+
 /* ─── RESPONSIVE ─── */
 @media (max-width: 768px) {
   #sidebar { width: 60px; min-width: 60px; }
@@ -753,3 +787,4 @@ textarea { resize: vertical; min-height: 80px; }
   .view { padding: 16px; }
   .form-row { grid-template-columns: 1fr; }
 }
+

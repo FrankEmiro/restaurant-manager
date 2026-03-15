@@ -35,6 +35,10 @@
       <span class="icon">📋</span>
       <span>Menu</span>
     </a>
+    <a data-view="agenda">
+      <span class="icon">📅</span>
+      <span>Agenda</span>
+    </a>
   </nav>
   <div class="sidebar-footer">
     <button class="btn btn-outline" onclick="logout()" style="width:100%;font-size:12px;padding:6px">⎋ Esci</button>
@@ -213,6 +217,72 @@
 
     <div class="menu-grid" id="menu-grid">
       <div style="text-align:center;padding:48px;color:var(--text-muted)">Caricamento menu...</div>
+    </div>
+  </section>
+
+  <!-- ══ AGENDA ══ -->
+  <section id="view-agenda" class="view">
+    <div class="view-header">
+      <h2>Agenda</h2>
+    </div>
+
+    <div class="agenda-tabs">
+      <button class="agenda-tab active" id="tab-prenotazioni" onclick="switchAgendaTab('prenotazioni')">Prenotazioni</button>
+      <button class="agenda-tab" id="tab-ordini" onclick="switchAgendaTab('ordini')">Ordini asporto</button>
+    </div>
+
+    <!-- Pannello prenotazioni -->
+    <div id="agenda-prenotazioni" class="agenda-panel">
+      <div class="agenda-filters">
+        <div class="form-group" style="margin:0">
+          <label>Dal</label>
+          <input type="date" id="agenda-res-from">
+        </div>
+        <div class="form-group" style="margin:0">
+          <label>Al</label>
+          <input type="date" id="agenda-res-to">
+        </div>
+        <button class="btn btn-primary" onclick="loadAgendaReservations()">Cerca</button>
+      </div>
+      <div class="card" style="padding:0;overflow-x:auto">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Data</th><th>Ora</th><th>Cliente</th><th>Ospiti</th><th>Tavolo</th><th>Note</th><th>Stato</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="agenda-res-body">
+            <tr><td colspan="8" style="text-align:center;padding:24px;color:var(--text-muted)">Seleziona un periodo e clicca Cerca</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Pannello ordini -->
+    <div id="agenda-ordini" class="agenda-panel" style="display:none">
+      <div class="agenda-filters">
+        <div class="form-group" style="margin:0">
+          <label>Dal</label>
+          <input type="date" id="agenda-ord-from">
+        </div>
+        <div class="form-group" style="margin:0">
+          <label>Al</label>
+          <input type="date" id="agenda-ord-to">
+        </div>
+        <button class="btn btn-primary" onclick="loadAgendaOrders()">Cerca</button>
+      </div>
+      <div class="card" style="padding:0;overflow-x:auto">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Data</th><th>Ritiro</th><th>Cliente</th><th>Stato</th><th>Totale</th><th>Note</th>
+            </tr>
+          </thead>
+          <tbody id="agenda-ord-body">
+            <tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text-muted)">Seleziona un periodo e clicca Cerca</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </section>
 

@@ -82,7 +82,7 @@ function countdownLabel(pickupDate, pickupTime) {
 
 // ─── ROUTER ─────────────────────────────────────
 
-const views = ['dashboard', 'cucina', 'mappa', 'editor', 'menu'];
+const views = ['dashboard', 'cucina', 'mappa', 'editor', 'menu', 'agenda'];
 let activeView = 'dashboard';
 
 // ─── AUTO-REFRESH ────────────────────────────────
@@ -120,6 +120,7 @@ function loadView(view) {
     case 'mappa': loadMap(); break;
     case 'editor': loadEditor(); break;
     case 'menu': loadMenu(); break;
+    case 'agenda': loadAgenda(); break;
   }
 }
 
@@ -848,6 +849,117 @@ document.addEventListener('click', (e) => {
     e.target.style.display = 'none';
   }
 });
+
+// ─── AGENDA ──────────────────────────────────────
+
+let agendaTab = 'prenotazioni';
+
+function nDaysFrom(n) {
+  const d = new Date();
+  d.setDate(d.getDate() + n);
+  return d.toISOString().slice(0, 10);
+}
+
+function switchAgendaTab(tab) {
+  agendaTab = tab;
+  document.getElementById('tab-prenotazioni').classList.toggle('active', tab === 'prenotazioni');
+  document.getElementById('tab-ordini').classList.toggle('active', tab === 'ordini');
+  document.getElementById('agenda-prenotazioni').style.display = tab === 'prenotazioni' ? '' : 'none';
+  document.getElementById('agenda-ordini').style.display = tab === 'ordini' ? '' : 'none';
+}
+
+async function loadAgenda() {
+  // Imposta i default solo la prima volta
+  if (!document.getElementById('agenda-res-from').value) {
+    document.getElementById('agenda-res-from').value = today();
+    document.getElementById('agenda-res-to').value = nDaysFrom(14);
+  }
+  if (!document.getElementById('agenda-ord-from').value) {
+    document.getElementById('agenda-ord-from').value = nDaysFrom(-30);
+    document.getElementById('agenda-ord-to').value = today();
+  }
+  if (agendaTab === 'prenotazioni') {
+    await loadAgendaReservations();
+  } else {
+    await loadAgendaOrders();
+  }
+}
+
+async function loadAgendaReservations() {
+  const from = document.getElementById('agenda-res-from').value;
+  const to   = document.getElementById('agenda-res-to').value;
+  const tbody = document.getElementById('agenda-res-body');
+  tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--text-muted)">Caricamento...</td></tr>';
+  try {
+    const params = new URLSearchParams();
+    if (from) params.set('from', from);
+    if (to)   params.set('to', to);
+    const rows = await apiFetch('/api/reservations?' + params);
+    if (rows.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--text-muted)">Nessuna prenotazione nel periodo</td></tr>';
+      return;
+    }
+    tbody.innerHTML = rows.map(r => `
+      <tr>
+        <td>${formatDate(r.date)}</td>
+        <td>${r.time}</td>
+        <td><strong>${r.customer_name}</strong><br><small style="color:var(--text-muted)">${r.customer_phone}</small></td>
+        <td>${r.guests}</td>
+        <td>${r.table_number || '—'}</td>
+        <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.notes || ''}">${r.notes || '—'}</td>
+        <td>${statusBadge(r.status)}</td>
+        <td>
+          <div class="row-actions">
+            <button class="btn btn-sm btn-outline" onclick="editReservation(${r.id})">✎</button>
+            ${r.status !== 'cancelled' ? `<button class="btn btn-sm btn-danger" onclick="cancelAgendaReservation(${r.id})">✕</button>` : ''}
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  } catch (e) {
+    toast('Errore: ' + e.message, 'error');
+  }
+}
+
+async function cancelAgendaReservation(id) {
+  if (!confirm('Cancellare questa prenotazione?')) return;
+  try {
+    await apiFetch(`/api/reservations/${id}`, { method: 'PATCH', body: { status: 'cancelled' } });
+    toast('Prenotazione cancellata');
+    loadAgendaReservations();
+  } catch (e) {
+    toast('Errore: ' + e.message, 'error');
+  }
+}
+
+async function loadAgendaOrders() {
+  const from = document.getElementById('agenda-ord-from').value;
+  const to   = document.getElementById('agenda-ord-to').value;
+  const tbody = document.getElementById('agenda-ord-body');
+  tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text-muted)">Caricamento...</td></tr>';
+  try {
+    const params = new URLSearchParams();
+    if (from) params.set('from', from);
+    if (to)   params.set('to', to);
+    const orders = await apiFetch('/api/orders?' + params);
+    if (orders.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text-muted)">Nessun ordine nel periodo</td></tr>';
+      return;
+    }
+    tbody.innerHTML = orders.map(o => `
+      <tr>
+        <td>${formatDate(o.pickup_date)}</td>
+        <td>${o.pickup_time}</td>
+        <td><strong>${o.customer_name}</strong><br><small style="color:var(--text-muted)">${o.customer_phone}</small></td>
+        <td>${statusBadge(o.status)}</td>
+        <td>€${(o.total || 0).toFixed(2)}</td>
+        <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${o.notes || ''}">${o.notes || '—'}</td>
+      </tr>
+    `).join('');
+  } catch (e) {
+    toast('Errore: ' + e.message, 'error');
+  }
+}
 
 // ─── INIT ────────────────────────────────────────
 
