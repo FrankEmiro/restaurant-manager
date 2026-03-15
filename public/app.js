@@ -127,11 +127,15 @@ function loadView(view) {
 
 async function loadDashboard() {
   try {
-    const [data, reservations, orders] = await Promise.all([
+    const [data, reservations, allOrders] = await Promise.all([
       apiFetch('/api/dashboard'),
       apiFetch(`/api/reservations?date=${today()}`),
-      apiFetch(`/api/orders?from=${today()}`),
+      apiFetch(`/api/orders`),
     ]);
+    const todayStr = today();
+    const orders = allOrders.filter(o =>
+      ['pending', 'preparing', 'ready'].includes(o.status) || o.pickup_date === todayStr
+    );
     const s = data.stats;
 
     document.getElementById('stat-reservations').textContent = s.reservationsToday;
