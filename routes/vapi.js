@@ -125,8 +125,8 @@ router.post('/orders/create', vapiMiddleware, (req, res) => {
   }
 });
 
-// POST /vapi/allergens
-router.post('/allergens', vapiMiddleware, (req, res) => {
+// POST /vapi/allergens  (alias: /vapi/get_allergens)
+function handleGetAllergens(req, res) {
   try {
     const items = db.prepare('SELECT name, description FROM allergens ORDER BY id').all();
     if (items.length === 0) return res.vapiSuccess('Nessun allergene registrato.');
@@ -135,7 +135,9 @@ router.post('/allergens', vapiMiddleware, (req, res) => {
   } catch (err) {
     res.vapiError('Errore interno: ' + err.message);
   }
-});
+}
+router.post('/allergens', vapiMiddleware, handleGetAllergens);
+router.post('/get_allergens', vapiMiddleware, handleGetAllergens);
 
 // POST /vapi/menu  (VAPI always POSTs — params come from body via vapiMiddleware)
 router.post('/menu', vapiMiddleware, (req, res) => {
