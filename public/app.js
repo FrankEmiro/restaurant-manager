@@ -584,11 +584,16 @@ function renderMenu() {
     return;
   }
 
-  grid.innerHTML = filtered.map(item => `
+  grid.innerHTML = filtered.map(item => {
+    const badges = [
+      item.vegan       ? '<span class="diet-badge vegan">🌱 Vegano</span>'        : '',
+      item.vegetarian  ? '<span class="diet-badge vegetarian">🌿 Vegetariano</span>' : '',
+    ].filter(Boolean).join('');
+    return `
     <div class="menu-item-card ${item.available ? '' : 'unavailable'}">
       <div class="mic-header">
         <div>
-          <div class="mic-cat">${item.category || ''}</div>
+          <div class="mic-cat">${item.category || ''}${badges ? ' ' + badges : ''}</div>
           <div class="mic-name">${item.name}</div>
         </div>
         <div class="mic-price">€${item.price.toFixed(2)}</div>
@@ -603,7 +608,7 @@ function renderMenu() {
         <button class="btn btn-sm btn-danger" onclick="deleteMenuItem(${item.id})">Elimina</button>
       </div>
     </div>
-  `).join('');
+  `}).join('');
 }
 
 function setMenuFilter(cat) {
@@ -626,6 +631,8 @@ function openAddMenuModal() {
   document.getElementById('menu-modal-title').textContent = 'Nuovo piatto';
   document.getElementById('menu-item-form').reset();
   document.getElementById('mi-id').value = '';
+  document.getElementById('mi-vegetarian').checked = false;
+  document.getElementById('mi-vegan').checked = false;
   document.getElementById('modal-menu-item').style.display = 'flex';
 }
 
@@ -638,6 +645,8 @@ function editMenuItem(id) {
   document.getElementById('mi-category').value = item.category || '';
   document.getElementById('mi-price').value = item.price;
   document.getElementById('mi-description').value = item.description || '';
+  document.getElementById('mi-vegetarian').checked = !!item.vegetarian;
+  document.getElementById('mi-vegan').checked = !!item.vegan;
   document.getElementById('modal-menu-item').style.display = 'flex';
 }
 
@@ -648,6 +657,8 @@ async function submitMenuItem() {
     category: document.getElementById('mi-category').value,
     price: parseFloat(document.getElementById('mi-price').value),
     description: document.getElementById('mi-description').value.trim(),
+    vegetarian: document.getElementById('mi-vegetarian').checked ? 1 : 0,
+    vegan: document.getElementById('mi-vegan').checked ? 1 : 0,
   };
   if (!body.name || isNaN(body.price)) { toast('Nome e prezzo obbligatori', 'error'); return; }
 

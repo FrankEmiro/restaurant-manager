@@ -18,15 +18,15 @@ router.get('/', (req, res) => {
 
 // POST /api/menu
 router.post('/', (req, res) => {
-  const { name, category, price, description = '', available = 1 } = req.body;
+  const { name, category, price, description = '', available = 1, vegetarian = 0, vegan = 0 } = req.body;
   if (!name || price === undefined) {
     return res.status(400).json({ error: 'name e price sono obbligatori' });
   }
   const now = new Date().toISOString();
   const result = db.prepare(`
-    INSERT INTO menu_items (name, category, price, description, available, created_at)
-    VALUES (?, ?, ?, ?, ?, ?)
-  `).run(name, category, price, description, available, now);
+    INSERT INTO menu_items (name, category, price, description, available, vegetarian, vegan, created_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(name, category, price, description, available, vegetarian ? 1 : 0, vegan ? 1 : 0, now);
   const item = db.prepare('SELECT * FROM menu_items WHERE id = ?').get(result.lastInsertRowid);
   res.status(201).json(item);
 });
@@ -34,7 +34,7 @@ router.post('/', (req, res) => {
 // PATCH /api/menu/:id
 router.patch('/:id', (req, res) => {
   const { id } = req.params;
-  const allowed = ['name', 'category', 'price', 'description', 'available'];
+  const allowed = ['name', 'category', 'price', 'description', 'available', 'vegetarian', 'vegan'];
   const updates = {};
   for (const key of allowed) {
     if (req.body[key] !== undefined) updates[key] = req.body[key];

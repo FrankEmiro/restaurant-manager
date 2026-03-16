@@ -83,6 +83,10 @@ db.exec(`
   );
 `);
 
+// Add vegetarian/vegan columns if not exist (safe migration)
+try { db.exec('ALTER TABLE menu_items ADD COLUMN vegetarian INTEGER DEFAULT 0'); } catch {}
+try { db.exec('ALTER TABLE menu_items ADD COLUMN vegan INTEGER DEFAULT 0'); } catch {}
+
 // Seed data if empty
 const tableCount = db.prepare('SELECT COUNT(*) as c FROM tables').get().c;
 if (tableCount === 0) {
