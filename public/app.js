@@ -175,9 +175,13 @@ async function loadDashboard() {
     } else {
       const nextStatus = { pending: 'preparing', preparing: 'ready', ready: 'picked_up' };
       const nextLabel = { pending: '▶ Prepara', preparing: '✓ Pronto', ready: '⬆ Archivia' };
-      ordersBody.innerHTML = orders.map(o => `
+      ordersBody.innerHTML = orders.map(o => {
+        const allergenBadge = (o.allergens && o.allergens.length > 0)
+          ? `<br><span style="color:#dc2626;font-size:11px;font-weight:600">⚠️ ${o.allergens.map(a => a.allergen_name).join(', ')}</span>`
+          : '';
+        return `
         <tr>
-          <td><strong>${o.customer_name}</strong><br><small style="color:var(--text-muted)">${o.customer_phone}</small></td>
+          <td><strong>${o.customer_name}</strong><br><small style="color:var(--text-muted)">${o.customer_phone}</small>${allergenBadge}</td>
           <td>${o.pickup_time}</td>
           <td>${statusBadge(o.status)}</td>
           <td>€${(o.total || 0).toFixed(2)}</td>
@@ -189,7 +193,7 @@ async function loadDashboard() {
             </div>
           </td>
         </tr>
-      `).join('');
+      `}).join('');
     }
   } catch (e) {
     toast('Errore caricamento dashboard: ' + e.message, 'error');
@@ -276,11 +280,16 @@ async function renderKitchen() {
         actions = `<button class="btn btn-outline" style="color:white;border-color:rgba(255,255,255,0.2)" onclick="updateOrderStatus(${o.id},'picked_up')">ARCHIVIA</button>`;
       }
 
+      const allergenBanner = (o.allergens && o.allergens.length > 0)
+        ? `<div class="kc-allergens">⚠️ ALLERGIE: ${o.allergens.map(a => a.allergen_name).join(', ')}</div>`
+        : '';
+
       return `
         <div class="kitchen-card ${o.status}">
           <div class="kc-status">${o.status === 'pending' ? '⏳ In attesa' : o.status === 'preparing' ? '🔥 In preparazione' : '✅ Pronto'}</div>
           <div class="kc-customer">${o.customer_name}</div>
           <div class="kc-time">Ritiro: ${o.pickup_time} ${countdownLabel(o.pickup_date, o.pickup_time)}</div>
+          ${allergenBanner}
           ${o.notes ? `<div class="kc-notes">📝 ${o.notes}</div>` : ''}
           <div class="kc-items">${items}</div>
           <div class="kc-actions">${actions}</div>
@@ -681,6 +690,15 @@ async function openAddOrderModal() {
   document.getElementById('ord-item-qty').value = 1;
   renderOrderItems();
 
+  // Load allergens as checkboxes
+  const allergens = await apiFetch('/api/allergens');
+  document.getElementById('ord-allergen-list').innerHTML = allergens.map(a => `
+    <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;padding:4px 6px;border-radius:4px;border:1px solid var(--border)">
+      <input type="checkbox" name="ord-allergen" value="${a.id}" style="cursor:pointer">
+      ${a.name}
+    </label>
+  `).join('');
+
   // Load menu into select
   if (allMenuItems.length === 0) {
     allMenuItems = await apiFetch('/api/menu');
@@ -765,6 +783,9 @@ async function submitOrder() {
     toast('Aggiungi almeno un piatto', 'error'); return;
   }
 
+  const allergen_ids = [...document.querySelectorAll('input[name="ord-allergen"]:checked')]
+    .map(cb => parseInt(cb.value));
+
   try {
     await apiFetch('/api/orders', {
       method: 'POST',
@@ -774,6 +795,7 @@ async function submitOrder() {
         pickup_date: date,
         pickup_time: time,
         notes,
+        allergen_ids,
         items: orderItems.map(i => ({ menu_item_id: i.id, quantity: i.quantity })),
       }
     });

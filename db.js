@@ -74,6 +74,13 @@ db.exec(`
     description TEXT DEFAULT '',
     created_at TEXT
   );
+
+  CREATE TABLE IF NOT EXISTS order_allergens (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    order_id INTEGER NOT NULL REFERENCES takeaway_orders(id),
+    allergen_id INTEGER REFERENCES allergens(id),
+    allergen_name TEXT NOT NULL
+  );
 `);
 
 // Seed data if empty

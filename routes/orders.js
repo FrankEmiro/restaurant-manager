@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 
+const getAllergens = db.prepare('SELECT * FROM order_allergens WHERE order_id = ?');
+
 function getOrderWithItems(id) {
   const order = db.prepare('SELECT * FROM takeaway_orders WHERE id = ?').get(id);
   if (!order) return null;
@@ -11,6 +13,7 @@ function getOrderWithItems(id) {
     LEFT JOIN menu_items mi ON oi.menu_item_id = mi.id
     WHERE oi.order_id = ?
   `).all(id);
+  order.allergens = getAllergens.all(id);
   return order;
 }
 
@@ -25,15 +28,18 @@ router.get('/', (req, res) => {
   if (status) { query += ' AND status = ?'; params.push(status); }
   query += ' ORDER BY pickup_date, pickup_time';
   const orders = db.prepare(query).all(...params);
-  // Attach items
+  // Attach items and allergens
   const getItems = db.prepare('SELECT * FROM order_items WHERE order_id = ?');
-  for (const o of orders) o.items = getItems.all(o.id);
+  for (const o of orders) {
+    o.items = getItems.all(o.id);
+    o.allergens = getAllergens.all(o.id);
+  }
   res.json(orders);
 });
 
 // POST /api/orders
 router.post('/', (req, res) => {
-  const { customer_name, customer_phone, pickup_date, pickup_time, notes = '', items = [] } = req.body;
+  const { customer_name, customer_phone, pickup_date, pickup_time, notes = '', items = [], allergen_ids = [] } = req.body;
   if (!customer_name || !customer_phone || !pickup_date || !pickup_time) {
     return res.status(400).json({ error: 'Campi obbligatori: customer_name, customer_phone, pickup_date, pickup_time' });
   }
@@ -72,12 +78,19 @@ router.post('/', (req, res) => {
     INSERT INTO order_items (order_id, menu_item_id, item_name, item_price, quantity)
     VALUES (?, ?, ?, ?, ?)
   `);
+  const insertAllergen = db.prepare(`
+    INSERT INTO order_allergens (order_id, allergen_id, allergen_name) VALUES (?, ?, ?)
+  `);
 
   const orderId = db.withTransaction(() => {
     const result = insertOrder.run(customer_name, customer_phone, pickup_date, pickup_time, notes, total, now);
     const orderId = result.lastInsertRowid;
     for (const item of resolvedItems) {
       insertItem.run(orderId, item.menu_item_id, item.name, item.price, item.quantity);
+    }
+    for (const aid of allergen_ids) {
+      const allergen = db.prepare('SELECT * FROM allergens WHERE id = ?').get(aid);
+      if (allergen) insertAllergen.run(orderId, allergen.id, allergen.name);
     }
     return orderId;
   });
