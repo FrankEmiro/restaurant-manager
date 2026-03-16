@@ -67,6 +67,13 @@ db.exec(`
     item_price REAL,
     quantity INTEGER NOT NULL
   );
+
+  CREATE TABLE IF NOT EXISTS allergens (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    description TEXT DEFAULT '',
+    created_at TEXT
+  );
 `);
 
 // Seed data if empty
@@ -119,6 +126,29 @@ if (menuCount === 0) {
     ['Caffè espresso', 'Bevande', 1.5, '', 1, now],
   ];
   for (const item of items) insertMenu.run(...item);
+}
+
+const allergenCount = db.prepare('SELECT COUNT(*) as c FROM allergens').get().c;
+if (allergenCount === 0) {
+  const insertAllergen = db.prepare(`INSERT INTO allergens (name, description, created_at) VALUES (?, ?, ?)`);
+  const now = new Date().toISOString();
+  const allergens = [
+    ['Glutine',         'Cereali contenenti glutine: grano, segale, orzo, avena e varietà ibridate'],
+    ['Crostacei',       'Granchi, gamberi, aragoste, scampi e prodotti derivati'],
+    ['Uova',            'Uova e prodotti a base di uova'],
+    ['Pesce',           'Pesce e prodotti a base di pesce'],
+    ['Arachidi',        'Arachidi e prodotti a base di arachidi'],
+    ['Soia',            'Soia e prodotti a base di soia'],
+    ['Latte',           'Latte e latticini (incluso lattosio)'],
+    ['Frutta a guscio', 'Mandorle, nocciole, noci, anacardi, noci pecan, pistacchi, noci macadamia'],
+    ['Sedano',          'Sedano e prodotti a base di sedano'],
+    ['Senape',          'Senape e prodotti a base di senape'],
+    ['Semi di sesamo',  'Semi di sesamo e prodotti a base di semi di sesamo'],
+    ['Solfiti',         'Anidride solforosa e solfiti in concentrazioni superiori a 10mg/kg'],
+    ['Lupino',          'Lupino e prodotti a base di lupino'],
+    ['Molluschi',       'Cozze, vongole, ostriche, capesante, polpo, calamari e prodotti derivati'],
+  ];
+  for (const [name, description] of allergens) insertAllergen.run(name, description, now);
 }
 
 // Helper for manual transactions (node:sqlite has no .transaction() helper)

@@ -57,6 +57,7 @@ app.use('/api/menu',         require('./routes/menu'));
 app.use('/api/reservations', require('./routes/reservations'));
 app.use('/api/orders',       require('./routes/orders'));
 app.use('/api/dashboard',    require('./routes/dashboard'));
+app.use('/api/allergens',    require('./routes/allergens'));
 
 // 7. VAPI routes (already whitelisted in requireAuth)
 app.use('/vapi', require('./routes/vapi'));

@@ -39,6 +39,10 @@
       <span class="icon">📅</span>
       <span>Agenda</span>
     </a>
+    <a data-view="allergeni">
+      <span class="icon">⚠️</span>
+      <span>Allergeni</span>
+    </a>
   </nav>
   <div class="sidebar-footer">
     <button class="btn btn-outline" onclick="logout()" style="width:100%;font-size:12px;padding:6px">⎋ Esci</button>
@@ -217,6 +221,20 @@
 
     <div class="menu-grid" id="menu-grid">
       <div style="text-align:center;padding:48px;color:var(--text-muted)">Caricamento menu...</div>
+    </div>
+  </section>
+
+  <!-- ══ ALLERGENI ══ -->
+  <section id="view-allergeni" class="view">
+    <div class="view-header">
+      <h2>Allergeni</h2>
+      <button class="btn btn-primary" onclick="openAddAllergenModal()">+ Aggiungi allergene</button>
+    </div>
+    <p style="color:var(--text-muted);font-size:13px;margin-bottom:20px">
+      Lista degli allergeni del ristorante. Pre-popolata con i 14 allergeni obbligatori EU (Reg. 1169/2011).
+    </p>
+    <div class="allergen-grid" id="allergen-grid">
+      <div style="text-align:center;padding:48px;color:var(--text-muted)">Caricamento...</div>
     </div>
   </section>
 
@@ -479,6 +497,33 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-outline" onclick="closeModal('modal-order')">Annulla</button>
         <button type="submit" class="btn btn-primary">Crea ordine</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Allergen Modal -->
+<div id="modal-allergen" class="modal-backdrop" style="display:none">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="allergen-modal-title">Nuovo allergene</h3>
+      <button class="modal-close" onclick="closeModal('modal-allergen')">×</button>
+    </div>
+    <form id="allergen-form" onsubmit="event.preventDefault(); submitAllergen()">
+      <div class="modal-body">
+        <input type="hidden" id="al-id">
+        <div class="form-group">
+          <label>Nome allergene *</label>
+          <input type="text" id="al-name" required placeholder="es. Glutine">
+        </div>
+        <div class="form-group">
+          <label>Descrizione</label>
+          <textarea id="al-description" placeholder="Cereali contenenti glutine..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeModal('modal-allergen')">Annulla</button>
+        <button type="submit" class="btn btn-primary">Salva</button>
       </div>
     </form>
   </div>

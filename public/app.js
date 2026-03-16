@@ -82,7 +82,7 @@ function countdownLabel(pickupDate, pickupTime) {
 
 // ─── ROUTER ─────────────────────────────────────
 
-const views = ['dashboard', 'cucina', 'mappa', 'editor', 'menu', 'agenda'];
+const views = ['dashboard', 'cucina', 'mappa', 'editor', 'menu', 'allergeni', 'agenda'];
 let activeView = 'dashboard';
 
 // ─── AUTO-REFRESH ────────────────────────────────
@@ -120,6 +120,7 @@ function loadView(view) {
     case 'mappa': loadMap(); break;
     case 'editor': loadEditor(); break;
     case 'menu': loadMenu(); break;
+    case 'allergeni': loadAllergens(); break;
     case 'agenda': loadAgenda(); break;
   }
 }
@@ -849,6 +850,85 @@ document.addEventListener('click', (e) => {
     e.target.style.display = 'none';
   }
 });
+
+// ─── ALLERGENI ───────────────────────────────────
+
+let allergensList = [];
+
+async function loadAllergens() {
+  allergensList = await apiFetch('/api/allergens');
+  renderAllergens();
+}
+
+function renderAllergens() {
+  const grid = document.getElementById('allergen-grid');
+  if (allergensList.length === 0) {
+    grid.innerHTML = '<div style="text-align:center;padding:48px;color:var(--text-muted)">Nessun allergene. Aggiungine uno.</div>';
+    return;
+  }
+  grid.innerHTML = allergensList.map((a, i) => `
+    <div class="allergen-card">
+      <div class="allergen-number">${i + 1}</div>
+      <div class="allergen-body">
+        <div class="allergen-name">${a.name}</div>
+        ${a.description ? `<div class="allergen-desc">${a.description}</div>` : ''}
+      </div>
+      <div class="allergen-actions">
+        <button class="btn btn-sm btn-outline" onclick="editAllergen(${a.id})">Modifica</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteAllergen(${a.id})">Elimina</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openAddAllergenModal() {
+  document.getElementById('allergen-modal-title').textContent = 'Nuovo allergene';
+  document.getElementById('allergen-form').reset();
+  document.getElementById('al-id').value = '';
+  document.getElementById('modal-allergen').style.display = 'flex';
+}
+
+function editAllergen(id) {
+  const a = allergensList.find(x => x.id === id);
+  if (!a) return;
+  document.getElementById('allergen-modal-title').textContent = 'Modifica allergene';
+  document.getElementById('al-id').value = a.id;
+  document.getElementById('al-name').value = a.name;
+  document.getElementById('al-description').value = a.description || '';
+  document.getElementById('modal-allergen').style.display = 'flex';
+}
+
+async function submitAllergen() {
+  const id = document.getElementById('al-id').value;
+  const body = {
+    name: document.getElementById('al-name').value.trim(),
+    description: document.getElementById('al-description').value.trim(),
+  };
+  if (!body.name) { toast('Il nome è obbligatorio', 'error'); return; }
+  try {
+    if (id) {
+      await apiFetch(`/api/allergens/${id}`, { method: 'PATCH', body });
+    } else {
+      await apiFetch('/api/allergens', { method: 'POST', body });
+    }
+    closeModal('modal-allergen');
+    await loadAllergens();
+    toast(id ? 'Allergene aggiornato' : 'Allergene aggiunto!');
+  } catch (e) {
+    toast('Errore: ' + e.message, 'error');
+  }
+}
+
+async function deleteAllergen(id) {
+  if (!confirm('Eliminare questo allergene?')) return;
+  try {
+    await apiFetch(`/api/allergens/${id}`, { method: 'DELETE' });
+    await loadAllergens();
+    toast('Allergene eliminato');
+  } catch (e) {
+    toast('Errore: ' + e.message, 'error');
+  }
+}
 
 // ─── AGENDA ──────────────────────────────────────
 
