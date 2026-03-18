@@ -160,8 +160,8 @@ async function loadDashboard() {
           <td>${statusBadge(r.status)}</td>
           <td>
             <div class="row-actions">
-              <button class="btn btn-sm btn-outline" onclick="editReservation(${r.id})">✎</button>
-              <button class="btn btn-sm btn-danger" onclick="cancelReservation(${r.id})">✕</button>
+              <button class="btn-icon" title="Modifica" onclick="editReservation(${r.id})"><i class="bi bi-pencil"></i></button>
+              <button class="btn-icon danger" title="Cancella" onclick="cancelReservation(${r.id})"><i class="bi bi-x-lg"></i></button>
             </div>
           </td>
         </tr>
@@ -174,10 +174,11 @@ async function loadDashboard() {
       ordersBody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text-muted)">Nessun ordine oggi</td></tr>';
     } else {
       const nextStatus = { pending: 'preparing', preparing: 'ready', ready: 'picked_up' };
-      const nextLabel = { pending: '▶ Prepara', preparing: '✓ Pronto', ready: '⬆ Archivia' };
+      const nextIcon  = { pending: 'bi-play-fill', preparing: 'bi-check-lg', ready: 'bi-archive' };
+      const nextLabel = { pending: 'Prepara', preparing: 'Pronto', ready: 'Archivia' };
       ordersBody.innerHTML = orders.map(o => {
         const allergenBadge = (o.allergens && o.allergens.length > 0)
-          ? `<br><span style="color:#dc2626;font-size:11px;font-weight:600">⚠️ ${o.allergens.map(a => a.allergen_name).join(', ')}</span>`
+          ? `<br><span style="color:#dc2626;font-size:11px;font-weight:600"><i class="bi bi-exclamation-triangle-fill"></i> ${o.allergens.map(a => a.allergen_name).join(', ')}</span>`
           : '';
         return `
         <tr>
@@ -188,8 +189,8 @@ async function loadDashboard() {
           <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${o.notes || ''}">${o.notes || '—'}</td>
           <td>
             <div class="row-actions">
-              ${nextStatus[o.status] ? `<button class="btn btn-sm btn-outline" onclick="advanceOrderStatus(${o.id},'${nextStatus[o.status]}')">${nextLabel[o.status]}</button>` : ''}
-              <button class="btn btn-sm btn-danger" onclick="deleteOrder(${o.id})">✕</button>
+              ${nextStatus[o.status] ? `<button class="btn-icon" title="${nextLabel[o.status]}" onclick="advanceOrderStatus(${o.id},'${nextStatus[o.status]}')"><i class="bi ${nextIcon[o.status]}"></i></button>` : ''}
+              <button class="btn-icon danger" title="Elimina" onclick="deleteOrder(${o.id})"><i class="bi bi-trash3"></i></button>
             </div>
           </td>
         </tr>
@@ -262,7 +263,7 @@ async function renderKitchen() {
     const grid = document.getElementById('kitchen-grid');
 
     if (active.length === 0) {
-      grid.innerHTML = '<div class="kitchen-empty">🍽️ Nessun ordine attivo</div>';
+      grid.innerHTML = '<div class="kitchen-empty"><i class="bi bi-cup-hot" style="font-size:40px;display:block;margin-bottom:12px;opacity:0.3"></i>Nessun ordine attivo</div>';
       return;
     }
 
@@ -273,24 +274,28 @@ async function renderKitchen() {
 
       let actions = '';
       if (o.status === 'pending') {
-        actions = `<button class="btn btn-warning" onclick="updateOrderStatus(${o.id},'preparing')">IN PREPARAZIONE</button>`;
+        actions = `<button class="btn btn-warning" onclick="updateOrderStatus(${o.id},'preparing')"><i class="bi bi-play-fill"></i> In preparazione</button>`;
       } else if (o.status === 'preparing') {
-        actions = `<button class="btn btn-success" onclick="updateOrderStatus(${o.id},'ready')">PRONTO ✓</button>`;
+        actions = `<button class="btn btn-success" onclick="updateOrderStatus(${o.id},'ready')"><i class="bi bi-check-lg"></i> Pronto</button>`;
       } else if (o.status === 'ready') {
-        actions = `<button class="btn btn-outline" style="color:white;border-color:rgba(255,255,255,0.2)" onclick="updateOrderStatus(${o.id},'picked_up')">ARCHIVIA</button>`;
+        actions = `<button class="btn btn-outline" style="color:white;border-color:rgba(255,255,255,0.2)" onclick="updateOrderStatus(${o.id},'picked_up')"><i class="bi bi-archive"></i> Archivia</button>`;
       }
 
       const allergenBanner = (o.allergens && o.allergens.length > 0)
-        ? `<div class="kc-allergens">⚠️ ALLERGIE: ${o.allergens.map(a => a.allergen_name).join(', ')}</div>`
+        ? `<div class="kc-allergens"><i class="bi bi-exclamation-triangle-fill"></i> ALLERGIE: ${o.allergens.map(a => a.allergen_name).join(', ')}</div>`
         : '';
+
+      const statusLabel = o.status === 'pending' ? '<i class="bi bi-hourglass-split"></i> In attesa'
+        : o.status === 'preparing' ? '<i class="bi bi-fire"></i> In preparazione'
+        : '<i class="bi bi-check-circle-fill"></i> Pronto';
 
       return `
         <div class="kitchen-card ${o.status}">
-          <div class="kc-status">${o.status === 'pending' ? '⏳ In attesa' : o.status === 'preparing' ? '🔥 In preparazione' : '✅ Pronto'}</div>
+          <div class="kc-status">${statusLabel}</div>
           <div class="kc-customer">${o.customer_name}</div>
           <div class="kc-time">Ritiro: ${o.pickup_time} ${countdownLabel(o.pickup_date, o.pickup_time)}</div>
           ${allergenBanner}
-          ${o.notes ? `<div class="kc-notes">📝 ${o.notes}</div>` : ''}
+          ${o.notes ? `<div class="kc-notes"><i class="bi bi-sticky"></i> ${o.notes}</div>` : ''}
           <div class="kc-items">${items}</div>
           <div class="kc-actions">${actions}</div>
         </div>`;
@@ -586,8 +591,8 @@ function renderMenu() {
 
   grid.innerHTML = filtered.map(item => {
     const badges = [
-      item.vegan       ? '<span class="diet-badge vegan">🌱 Vegano</span>'        : '',
-      item.vegetarian  ? '<span class="diet-badge vegetarian">🌿 Vegetariano</span>' : '',
+      item.vegan       ? '<span class="diet-badge vegan"><i class="bi bi-flower1"></i> Vegano</span>'        : '',
+      item.vegetarian  ? '<span class="diet-badge vegetarian"><i class="bi bi-leaf"></i> Vegetariano</span>' : '',
     ].filter(Boolean).join('');
     return `
     <div class="menu-item-card ${item.available ? '' : 'unavailable'}">
@@ -604,8 +609,8 @@ function renderMenu() {
           <input type="checkbox" ${item.available ? 'checked' : ''} onchange="toggleMenuItem(${item.id}, this.checked)">
           <span class="toggle-slider"></span>
         </label>
-        <button class="btn btn-sm btn-outline" onclick="editMenuItem(${item.id})">Modifica</button>
-        <button class="btn btn-sm btn-danger" onclick="deleteMenuItem(${item.id})">Elimina</button>
+        <button class="btn-icon" title="Modifica" onclick="editMenuItem(${item.id})"><i class="bi bi-pencil"></i></button>
+        <button class="btn-icon danger" title="Elimina" onclick="deleteMenuItem(${item.id})"><i class="bi bi-trash3"></i></button>
       </div>
     </div>
   `}).join('');
@@ -704,8 +709,8 @@ async function openAddOrderModal() {
   // Load allergens as checkboxes
   const allergens = await apiFetch('/api/allergens');
   document.getElementById('ord-allergen-list').innerHTML = allergens.map(a => `
-    <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;padding:4px 6px;border-radius:4px;border:1px solid var(--border)">
-      <input type="checkbox" name="ord-allergen" value="${a.id}" style="cursor:pointer">
+    <label class="check-label">
+      <input type="checkbox" name="ord-allergen" value="${a.id}">
       ${a.name}
     </label>
   `).join('');
@@ -907,8 +912,8 @@ function renderAllergens() {
         ${a.description ? `<div class="allergen-desc">${a.description}</div>` : ''}
       </div>
       <div class="allergen-actions">
-        <button class="btn btn-sm btn-outline" onclick="editAllergen(${a.id})">Modifica</button>
-        <button class="btn btn-sm btn-danger" onclick="deleteAllergen(${a.id})">Elimina</button>
+        <button class="btn-icon" title="Modifica" onclick="editAllergen(${a.id})"><i class="bi bi-pencil"></i></button>
+        <button class="btn-icon danger" title="Elimina" onclick="deleteAllergen(${a.id})"><i class="bi bi-trash3"></i></button>
       </div>
     </div>
   `).join('');
@@ -1023,8 +1028,8 @@ async function loadAgendaReservations() {
         <td>${statusBadge(r.status)}</td>
         <td>
           <div class="row-actions">
-            <button class="btn btn-sm btn-outline" onclick="editReservation(${r.id})">✎</button>
-            ${r.status !== 'cancelled' ? `<button class="btn btn-sm btn-danger" onclick="cancelAgendaReservation(${r.id})">✕</button>` : ''}
+            <button class="btn-icon" title="Modifica" onclick="editReservation(${r.id})"><i class="bi bi-pencil"></i></button>
+            ${r.status !== 'cancelled' ? `<button class="btn-icon danger" title="Cancella" onclick="cancelAgendaReservation(${r.id})"><i class="bi bi-x-lg"></i></button>` : ''}
           </div>
         </td>
       </tr>

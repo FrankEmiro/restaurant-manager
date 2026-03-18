@@ -67,8 +67,11 @@ body {
 }
 
 #sidebar .logo {
-  padding: 28px 22px 22px;
+  padding: 20px 18px;
   border-bottom: 1px solid var(--sidebar-line);
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 #sidebar .logo h1 {
@@ -1044,6 +1047,135 @@ textarea { resize: vertical; min-height: 80px; }
   border: 1px solid var(--border);
   border-left: 4px solid var(--orange);
   box-shadow: var(--shadow-sm);
+}
+
+/* ═══════════════════════════════════════
+   LOGO ICON
+═══════════════════════════════════════ */
+.logo-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--orange), var(--orange-dark));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: white;
+  flex-shrink: 0;
+  box-shadow: 0 3px 10px rgba(232,100,30,0.4);
+}
+
+/* ═══════════════════════════════════════
+   STAT ICON
+═══════════════════════════════════════ */
+.stat-icon {
+  font-size: 20px;
+  color: var(--beige);
+  margin-bottom: 10px;
+  position: relative;
+  z-index: 1;
+}
+.stat-card.accent .stat-icon { color: var(--orange); }
+.stat-card.success .stat-icon { color: var(--success); }
+
+/* ═══════════════════════════════════════
+   ICON-ONLY BUTTON
+═══════════════════════════════════════ */
+.btn-icon {
+  padding: 7px 10px;
+  background: transparent;
+  border: 1.5px solid var(--border-warm);
+  color: var(--text-muted);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.18s;
+}
+.btn-icon:hover {
+  border-color: var(--orange);
+  color: var(--orange);
+  background: var(--orange-faint);
+}
+.btn-icon.danger:hover {
+  border-color: var(--danger);
+  color: var(--danger);
+  background: #fde8e8;
+}
+
+/* ═══════════════════════════════════════
+   LOGOUT BUTTON
+═══════════════════════════════════════ */
+.btn-logout {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.04);
+  color: rgba(255,255,255,0.45);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.btn-logout:hover {
+  background: rgba(196,40,40,0.15);
+  border-color: rgba(196,40,40,0.3);
+  color: #ff8080;
+}
+
+/* ═══════════════════════════════════════
+   CHECK LABEL (vegetarian/vegan checkboxes)
+═══════════════════════════════════════ */
+.check-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: var(--radius-xs);
+  border: 1.5px solid var(--border);
+  transition: all 0.15s;
+}
+.check-label:hover {
+  border-color: var(--orange-light);
+  background: var(--orange-faint);
+}
+.check-label input[type="checkbox"] { cursor: pointer; }
+
+/* ═══════════════════════════════════════
+   MODAL SECTIONS
+═══════════════════════════════════════ */
+.modal-section {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.modal-section-title {
+  background: linear-gradient(to right, #fffcf7, #faf6f0);
+  padding: 10px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.modal-section > *:not(.modal-section-title) {
+  padding: 14px;
 }
 
 /* ═══════════════════════════════════════
