@@ -8,8 +8,7 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: system-ui, sans-serif; background: #0f1117; color: #e2e8f0; display: flex; min-height: 100vh; }
 
-    /* Sidebar */
-    aside { width: 240px; background: #1a1d2e; border-right: 1px solid #2e3250; padding: 24px 0; position: fixed; top: 0; bottom: 0; overflow-y: auto; }
+    aside { width: 250px; background: #1a1d2e; border-right: 1px solid #2e3250; padding: 24px 0; position: fixed; top: 0; bottom: 0; overflow-y: auto; }
     .aside-logo { padding: 0 20px 20px; border-bottom: 1px solid #2e3250; margin-bottom: 16px; }
     .aside-logo h1 { font-size: 15px; color: #e2e8f0; }
     .aside-logo p { font-size: 11px; color: #64748b; margin-top: 2px; }
@@ -17,35 +16,34 @@
     aside a { display: block; padding: 6px 20px; font-size: 13px; color: #94a3b8; text-decoration: none; }
     aside a:hover { color: #e2e8f0; background: rgba(255,255,255,0.04); }
 
-    /* Main */
-    main { margin-left: 240px; padding: 40px 48px; max-width: 900px; width: 100%; }
+    main { margin-left: 250px; padding: 40px 48px; max-width: 920px; width: 100%; }
     h1 { font-size: 28px; margin-bottom: 8px; }
-    h2 { font-size: 20px; margin: 40px 0 16px; color: #e2e8f0; padding-top: 16px; border-top: 1px solid #2e3250; }
+    h2 { font-size: 20px; margin: 44px 0 16px; color: #e2e8f0; padding-top: 16px; border-top: 1px solid #2e3250; }
     h3 { font-size: 15px; color: #94a3b8; margin: 24px 0 10px; }
     p { font-size: 14px; color: #94a3b8; line-height: 1.6; margin-bottom: 12px; }
     .subtitle { font-size: 15px; color: #64748b; margin-bottom: 32px; }
 
-    /* Endpoint badges */
-    .endpoint { display: inline-flex; align-items: center; gap: 8px; background: #1e2235; border: 1px solid #2e3250; border-radius: 8px; padding: 8px 14px; margin-bottom: 8px; font-size: 13px; font-family: monospace; }
+    .endpoint { display: inline-flex; align-items: center; gap: 8px; background: #1e2235; border: 1px solid #2e3250; border-radius: 8px; padding: 8px 14px; margin-bottom: 6px; font-size: 13px; font-family: monospace; }
     .method { background: #7c3aed; color: white; border-radius: 4px; padding: 2px 7px; font-size: 11px; font-weight: 700; }
-    .method.get { background: #059669; }
+    .badge-new { background: #065f46; color: #6ee7b7; border-radius: 4px; padding: 2px 7px; font-size: 10px; font-weight: 700; font-family: system-ui; }
 
-    /* Code blocks */
     .code-wrap { position: relative; margin: 12px 0 24px; }
     pre { background: #1e2235; border: 1px solid #2e3250; border-radius: 10px; padding: 20px; font-size: 12.5px; line-height: 1.6; overflow-x: auto; color: #e2e8f0; white-space: pre-wrap; word-break: break-word; }
     .copy-btn { position: absolute; top: 10px; right: 10px; border: none; border-radius: 6px; padding: 5px 12px; font-size: 12px; cursor: pointer; font-weight: 600; }
-    .copy-btn.blue  { background: #4f6ef7; color: #fff; }
+    .copy-btn.blue   { background: #4f6ef7; color: #fff; }
     .copy-btn.purple { background: #7c3aed; color: #fff; }
 
-    /* Alert */
     .alert { border-radius: 10px; padding: 16px 20px; font-size: 13px; line-height: 1.7; margin: 20px 0; }
     .alert-info    { background: rgba(79,110,247,0.12); border: 1px solid rgba(79,110,247,0.3); color: #93c5fd; }
     .alert-success { background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.3); color: #6ee7b7; }
 
-    /* Tool list */
     .tool-card { background: #1a1d2e; border: 1px solid #2e3250; border-radius: 10px; padding: 16px 20px; margin-bottom: 12px; }
     .tool-name { font-size: 14px; font-weight: 700; font-family: monospace; color: #a78bfa; }
     .tool-desc { font-size: 13px; color: #94a3b8; margin-top: 4px; }
+    .tool-card.new-tool { border-color: #065f46; }
+    .tool-card.new-tool .tool-name { color: #34d399; }
+
+    .endpoints-grid { display: flex; flex-direction: column; gap: 6px; }
   </style>
 </head>
 <body>
@@ -61,12 +59,20 @@
   <div class="toc-section">VAPI Composer</div>
   <a href="#vapi-composer">System Prompt</a>
   <a href="#vapi-tools-json">Tools JSON</a>
-  <div class="toc-section">Tool Reference</div>
+  <div class="toc-section">Prenotazioni</div>
   <a href="#tool-reservation-create">create_reservation</a>
   <a href="#tool-reservation-cancel">cancel_reservation</a>
+  <a href="#tool-reservation-list">list_reservations ✦</a>
+  <a href="#tool-reservation-update">update_reservation ✦</a>
+  <div class="toc-section">Ordini Asporto</div>
   <a href="#tool-order-create">create_order</a>
+  <a href="#tool-order-cancel">cancel_order ✦</a>
+  <a href="#tool-order-list">list_orders ✦</a>
+  <a href="#tool-order-update">update_order ✦</a>
+  <div class="toc-section">Catalogo</div>
   <a href="#tool-menu">get_menu</a>
   <a href="#tool-availability">check_availability</a>
+  <a href="#tool-allergens">get_allergens</a>
 </aside>
 
 <main>
@@ -75,20 +81,28 @@
 
   <!-- OVERVIEW -->
   <h2 id="overview">Come funziona</h2>
-  <p>L'agente vocale VAPI risponde alle telefonate dei clienti e chiama questi endpoint per creare prenotazioni, ordini asporto e consultare il menu in tempo reale.</p>
+  <p>L'agente vocale VAPI risponde alle telefonate dei clienti e chiama questi endpoint per creare, consultare e modificare prenotazioni e ordini asporto in tempo reale.</p>
   <div class="alert alert-info">
-    <strong>Nota:</strong> Gli endpoint <code>/vapi/*</code> sono sempre pubblici (no autenticazione). Le chiamate arrivano dai server VAPI, non da browser.
+    <strong>Nota:</strong> Gli endpoint <code>/vapi/*</code> sono sempre pubblici (no autenticazione). Le chiamate arrivano dai server VAPI, non da browser. Tutti accettano POST e restituiscono sempre HTTP 200.
   </div>
 
   <!-- ENDPOINTS -->
   <h2 id="endpoints">Endpoint disponibili</h2>
-  <div class="endpoint"><span class="method">POST</span>/vapi/reservations/create</div><br>
-  <div class="endpoint"><span class="method">POST</span>/vapi/reservations/cancel</div><br>
-  <div class="endpoint"><span class="method">POST</span>/vapi/orders/create</div><br>
-  <div class="endpoint"><span class="method">POST</span>/vapi/menu</div><br>
-  <div class="endpoint"><span class="method">POST</span>/vapi/availability</div>
+  <div class="endpoints-grid">
+    <div><div class="endpoint"><span class="method">POST</span>/vapi/reservations/create</div></div>
+    <div><div class="endpoint"><span class="method">POST</span>/vapi/reservations/cancel</div></div>
+    <div><div class="endpoint"><span class="method">POST</span>/vapi/reservations/list <span class="badge-new">NUOVO</span></div></div>
+    <div><div class="endpoint"><span class="method">POST</span>/vapi/reservations/update <span class="badge-new">NUOVO</span></div></div>
+    <div><div class="endpoint"><span class="method">POST</span>/vapi/orders/create</div></div>
+    <div><div class="endpoint"><span class="method">POST</span>/vapi/orders/cancel <span class="badge-new">NUOVO</span></div></div>
+    <div><div class="endpoint"><span class="method">POST</span>/vapi/orders/list <span class="badge-new">NUOVO</span></div></div>
+    <div><div class="endpoint"><span class="method">POST</span>/vapi/orders/update <span class="badge-new">NUOVO</span></div></div>
+    <div><div class="endpoint"><span class="method">POST</span>/vapi/menu</div></div>
+    <div><div class="endpoint"><span class="method">POST</span>/vapi/availability</div></div>
+    <div><div class="endpoint"><span class="method">POST</span>/vapi/allergens</div></div>
+  </div>
 
-  <!-- VAPI COMPOSER — SYSTEM PROMPT -->
+  <!-- SYSTEM PROMPT -->
   <h2 id="vapi-composer">🤖 VAPI Composer — System Prompt</h2>
   <p>Copia e incolla nel campo <strong>System Prompt</strong> del tuo assistente VAPI.</p>
   <div class="code-wrap">
@@ -108,20 +122,41 @@ Il tuo compito è rispondere alle telefonate dei clienti in modo professionale, 
 ## COSA PUOI FARE
 Usa i tool disponibili per:
 
-- **Verificare disponibilità tavoli** → tool `check_availability`
+### PRENOTAZIONI TAVOLI
+- **Verificare disponibilità** → tool `check_availability`
   Quando il cliente chiede se c'è posto per una certa data, orario e numero di persone
 
 - **Creare una prenotazione** → tool `create_reservation`
-  Quando il cliente vuole prenotare un tavolo. Raccogli: nome, telefono, data, orario, numero ospiti, eventuali note
+  Quando il cliente vuole prenotare. Raccogli: nome, telefono, data, orario, numero ospiti, eventuali note
 
 - **Cancellare una prenotazione** → tool `cancel_reservation`
-  Quando il cliente vuole disdire. Chiedi: nome, data della prenotazione (o ID se lo conosce)
+  Quando il cliente vuole disdire. Chiedi nome e data (o ID se lo conosce)
 
+- **Cercare le prenotazioni di un cliente** → tool `list_reservations`
+  Quando il cliente chiede di vedere o confermare le sue prenotazioni attive. Usa telefono o nome
+
+- **Modificare una prenotazione** → tool `update_reservation`
+  Quando il cliente vuole cambiare data, orario o numero ospiti. Prima usa `list_reservations` per trovare l'ID, poi aggiorna
+
+### ORDINI ASPORTO
 - **Consultare il menu** → tool `get_menu`
-  Quando il cliente chiede cosa c'è nel menu, i prezzi o piatti di una categoria specifica
+  Quando il cliente chiede cosa c'è nel menu o vuole conoscere i prezzi
 
-- **Ordinare asporto** → tool `create_order`
-  Quando il cliente vuole ordinare da asporto. Raccogli: nome, telefono, data e orario ritiro, piatti e quantità
+- **Creare un ordine asporto** → tool `create_order`
+  Quando il cliente vuole ordinare. Raccogli: nome, telefono, data e orario ritiro, piatti e quantità (usa ID da get_menu)
+
+- **Cercare gli ordini di un cliente** → tool `list_orders`
+  Quando il cliente chiede di controllare un ordine già fatto. Usa telefono o nome
+
+- **Modificare un ordine** → tool `update_order`
+  Quando il cliente vuole cambiare orario o data di ritiro, o aggiungere note. Solo ordini in stato "in attesa" o "in preparazione"
+
+- **Cancellare un ordine** → tool `cancel_order`
+  Quando il cliente vuole annullare un ordine. Solo ordini non ancora pronti/ritirati
+
+### ALLERGIE E DIETE
+- **Informarsi sugli allergeni** → tool `get_allergens`
+  Quando il cliente chiede degli allergeni presenti. Non chiedere proattivamente: registra le allergie solo se il cliente le comunica spontaneamente
 
 ## REGOLE DI COMPORTAMENTO
 - Sii breve nelle risposte vocali: massimo 2-3 frasi
@@ -129,14 +164,15 @@ Usa i tool disponibili per:
 - Per le date usa il formato YYYY-MM-DD (es. 2026-03-20), per gli orari HH:MM (es. 20:30)
 - Se la richiesta non rientra nelle tue competenze, di': "La passo al nostro staff, la ricontatteremo al più presto"
 - Non fornire dati personali di altri clienti
+- Per modifiche/cancellazioni: identifica prima l'ordine/prenotazione con list_orders o list_reservations, poi procedi
 
 ## FORMATO RISPOSTE
 - Parla in modo naturale, non elencare dati tecnici
-- Conferma sempre l'azione: "Ho registrato la sua prenotazione...", "L'ordine è confermato..."
+- Conferma sempre l'azione: "Ho aggiornato la sua prenotazione...", "L'ordine è annullato..."
 - Concludi sempre chiedendo: "Posso aiutarla con altro?"</pre>
   </div>
 
-  <!-- VAPI COMPOSER — TOOLS JSON -->
+  <!-- TOOLS JSON -->
   <h2 id="vapi-tools-json">🔧 Tools JSON — Configurazione completa</h2>
   <p>Copia e incolla nella sezione <strong>Tools</strong> del tuo assistente VAPI (modalità JSON raw).</p>
   <p>Sostituisci <code>TUO-DOMINIO</code> con il tuo URL pubblico (es. <code>restaurant.example.com</code>).</p>
@@ -186,7 +222,7 @@ Usa i tool disponibili per:
     "type": "function",
     "function": {
       "name": "cancel_reservation",
-      "description": "Cancella una prenotazione esistente. Usare quando il cliente vuole disdire. Identificare la prenotazione tramite ID, oppure nome+data o telefono+data.",
+      "description": "Cancella una prenotazione esistente. Usare quando il cliente vuole disdire. Identificare tramite ID, oppure nome+data o telefono+data.",
       "url": "https://TUO-DOMINIO/vapi/reservations/cancel",
       "method": "POST",
       "parameters": {
@@ -203,8 +239,46 @@ Usa i tool disponibili per:
   {
     "type": "function",
     "function": {
+      "name": "list_reservations",
+      "description": "Cerca le prenotazioni attive di un cliente tramite telefono o nome. Usare quando il cliente chiede di vedere le sue prenotazioni o prima di modificarne una.",
+      "url": "https://TUO-DOMINIO/vapi/reservations/list",
+      "method": "POST",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "customer_phone": { "type": "string", "description": "Telefono del cliente (preferito)" },
+          "customer_name":  { "type": "string", "description": "Nome del cliente (se non si ha il telefono)" },
+          "date":           { "type": "string", "description": "Data specifica in formato YYYY-MM-DD (opzionale per filtrare)" }
+        }
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "update_reservation",
+      "description": "Modifica una prenotazione esistente (data, orario, numero ospiti o note). Prima di usare questo tool, usa list_reservations per ottenere l'ID.",
+      "url": "https://TUO-DOMINIO/vapi/reservations/update",
+      "method": "POST",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "reservation_id":  { "type": "integer", "description": "ID della prenotazione da modificare (preferito)" },
+          "customer_phone":  { "type": "string",  "description": "Telefono del cliente per identificare la prenotazione" },
+          "date":            { "type": "string",  "description": "Data attuale della prenotazione (per identificarla senza ID)" },
+          "new_date":        { "type": "string",  "description": "Nuova data in formato YYYY-MM-DD" },
+          "new_time":        { "type": "string",  "description": "Nuovo orario in formato HH:MM" },
+          "guests":          { "type": "integer", "description": "Nuovo numero di ospiti" },
+          "notes":           { "type": "string",  "description": "Nuove note (sovrascrive le precedenti)" }
+        }
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
       "name": "get_menu",
-      "description": "Restituisce i piatti disponibili del menu, con prezzi. Usare quando il cliente chiede cosa c'è nel menu o vuole conoscere i piatti di una categoria.",
+      "description": "Restituisce i piatti disponibili del menu con ID e prezzi. Usare quando il cliente chiede cosa c'è nel menu o prima di creare un ordine asporto.",
       "url": "https://TUO-DOMINIO/vapi/menu",
       "method": "POST",
       "parameters": {
@@ -223,18 +297,18 @@ Usa i tool disponibili per:
     "type": "function",
     "function": {
       "name": "create_order",
-      "description": "Crea un ordine asporto. Usare quando il cliente vuole ordinare da asporto e ha fornito nome, telefono, orario di ritiro e i piatti desiderati con le quantità.",
+      "description": "Crea un ordine asporto. Usare quando il cliente vuole ordinare e ha fornito nome, telefono, orario ritiro e i piatti desiderati. Usare get_menu prima per ottenere gli ID piatto.",
       "url": "https://TUO-DOMINIO/vapi/orders/create",
       "method": "POST",
       "parameters": {
         "type": "object",
         "required": ["customer_name", "customer_phone", "pickup_date", "pickup_time", "items"],
         "properties": {
-          "customer_name":  { "type": "string",  "description": "Nome e cognome del cliente" },
-          "customer_phone": { "type": "string",  "description": "Numero di telefono" },
-          "pickup_date":    { "type": "string",  "description": "Data di ritiro in formato YYYY-MM-DD" },
-          "pickup_time":    { "type": "string",  "description": "Orario di ritiro in formato HH:MM" },
-          "notes":          { "type": "string",  "description": "Note: allergie, modifiche ai piatti" },
+          "customer_name":  { "type": "string", "description": "Nome e cognome del cliente" },
+          "customer_phone": { "type": "string", "description": "Numero di telefono" },
+          "pickup_date":    { "type": "string", "description": "Data di ritiro in formato YYYY-MM-DD" },
+          "pickup_time":    { "type": "string", "description": "Orario di ritiro in formato HH:MM" },
+          "notes":          { "type": "string", "description": "Note: allergie, modifiche ai piatti" },
           "items": {
             "type": "array",
             "description": "Lista dei piatti ordinati",
@@ -250,13 +324,77 @@ Usa i tool disponibili per:
         }
       }
     }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "list_orders",
+      "description": "Cerca gli ordini asporto attivi di un cliente tramite telefono o nome. Usare quando il cliente chiede di controllare un ordine o prima di modificarlo/annullarlo.",
+      "url": "https://TUO-DOMINIO/vapi/orders/list",
+      "method": "POST",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "customer_phone": { "type": "string", "description": "Telefono del cliente (preferito)" },
+          "customer_name":  { "type": "string", "description": "Nome del cliente" },
+          "pickup_date":    { "type": "string", "description": "Data ritiro in formato YYYY-MM-DD (opzionale per filtrare)" }
+        }
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "cancel_order",
+      "description": "Annulla un ordine asporto non ancora pronto o ritirato. Usare quando il cliente vuole cancellare un ordine. Prima usa list_orders per ottenere l'ID se non noto.",
+      "url": "https://TUO-DOMINIO/vapi/orders/cancel",
+      "method": "POST",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "order_id":      { "type": "integer", "description": "ID dell'ordine (preferito)" },
+          "customer_phone": { "type": "string", "description": "Telefono del cliente per identificare l'ordine" },
+          "pickup_date":   { "type": "string",  "description": "Data ritiro in formato YYYY-MM-DD (per identificare l'ordine senza ID)" }
+        }
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "update_order",
+      "description": "Modifica l'orario o la data di ritiro di un ordine asporto, oppure le note. Solo ordini in stato 'in attesa' o 'in preparazione'. Prima usa list_orders per ottenere l'ID.",
+      "url": "https://TUO-DOMINIO/vapi/orders/update",
+      "method": "POST",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "order_id":         { "type": "integer", "description": "ID dell'ordine da modificare (preferito)" },
+          "customer_phone":   { "type": "string",  "description": "Telefono del cliente per identificare l'ordine" },
+          "pickup_date":      { "type": "string",  "description": "Data ritiro attuale in formato YYYY-MM-DD (per identificare senza ID)" },
+          "new_pickup_date":  { "type": "string",  "description": "Nuova data di ritiro in formato YYYY-MM-DD" },
+          "new_pickup_time":  { "type": "string",  "description": "Nuovo orario di ritiro in formato HH:MM" },
+          "notes":            { "type": "string",  "description": "Nuove note (sovrascrive le precedenti)" }
+        }
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "get_allergens",
+      "description": "Restituisce la lista degli allergeni registrati nel sistema. Usare solo quando il cliente chiede esplicitamente degli allergeni presenti.",
+      "url": "https://TUO-DOMINIO/vapi/allergens",
+      "method": "POST",
+      "parameters": { "type": "object", "properties": {} }
+    }
   }
 ]</pre>
   </div>
 
   <div class="alert alert-success">
     <strong>Come configurare in VAPI Composer:</strong><br>
-    1. Vai su <strong>dashboard.vapi.ai</strong> → Assistants → Create (o apri il tuo assistente)<br>
+    1. Vai su <strong>dashboard.vapi.ai</strong> → Assistants → apri il tuo assistente<br>
     2. Incolla il <strong>System Prompt</strong> nel campo apposito<br>
     3. Nella sezione <strong>Tools</strong>, incolla il JSON completo in modalità raw<br>
     4. Imposta <strong>First Message</strong>: "Buongiorno, sono l'assistente vocale del ristorante. Come posso aiutarla?"<br>
@@ -269,31 +407,67 @@ Usa i tool disponibili per:
   <h3 id="tool-reservation-create">create_reservation</h3>
   <div class="tool-card">
     <div class="tool-name">POST /vapi/reservations/create</div>
-    <div class="tool-desc">Crea una nuova prenotazione. Campi obbligatori: customer_name, customer_phone, date (YYYY-MM-DD), time (HH:MM), guests.</div>
+    <div class="tool-desc">Crea una nuova prenotazione. Campi obbligatori: customer_name, customer_phone, date (YYYY-MM-DD), time (HH:MM), guests. Campo opzionale: notes.</div>
   </div>
 
   <h3 id="tool-reservation-cancel">cancel_reservation</h3>
   <div class="tool-card">
     <div class="tool-name">POST /vapi/reservations/cancel</div>
-    <div class="tool-desc">Cancella una prenotazione. Identificazione tramite reservation_id, oppure customer_phone+date, oppure customer_name+date.</div>
+    <div class="tool-desc">Cancella una prenotazione confermata. Identificazione tramite reservation_id, oppure customer_phone+date, oppure customer_name+date.</div>
+  </div>
+
+  <h3 id="tool-reservation-list">list_reservations <span class="badge-new">NUOVO</span></h3>
+  <div class="tool-card new-tool">
+    <div class="tool-name">POST /vapi/reservations/list</div>
+    <div class="tool-desc">Cerca le prenotazioni attive (status=confirmed) di un cliente. Input: customer_phone o customer_name, opzionale date. Restituisce max 5 risultati con ID, data, orario, ospiti. Usare prima di una modifica per ottenere l'ID.</div>
+  </div>
+
+  <h3 id="tool-reservation-update">update_reservation <span class="badge-new">NUOVO</span></h3>
+  <div class="tool-card new-tool">
+    <div class="tool-name">POST /vapi/reservations/update</div>
+    <div class="tool-desc">Modifica una prenotazione esistente. Identificazione tramite reservation_id (preferito) o customer_phone+date. Campi modificabili: new_date, new_time, guests, notes. Almeno un campo richiesto.</div>
   </div>
 
   <h3 id="tool-order-create">create_order</h3>
   <div class="tool-card">
     <div class="tool-name">POST /vapi/orders/create</div>
-    <div class="tool-desc">Crea un ordine asporto con lista piatti. Usa gli ID piatto ottenuti da get_menu. Calcola il totale automaticamente.</div>
+    <div class="tool-desc">Crea un ordine asporto con lista piatti. Usa gli ID piatto ottenuti da get_menu. Calcola il totale automaticamente. Campi obbligatori: customer_name, customer_phone, pickup_date, pickup_time, items[].</div>
+  </div>
+
+  <h3 id="tool-order-cancel">cancel_order <span class="badge-new">NUOVO</span></h3>
+  <div class="tool-card new-tool">
+    <div class="tool-name">POST /vapi/orders/cancel</div>
+    <div class="tool-desc">Annulla un ordine asporto non ancora pronto/ritirato. Identificazione tramite order_id (preferito), oppure customer_phone+pickup_date, oppure solo customer_phone (prende il più recente attivo).</div>
+  </div>
+
+  <h3 id="tool-order-list">list_orders <span class="badge-new">NUOVO</span></h3>
+  <div class="tool-card new-tool">
+    <div class="tool-name">POST /vapi/orders/list</div>
+    <div class="tool-desc">Cerca gli ordini asporto attivi (esclude picked_up) di un cliente. Input: customer_phone o customer_name, opzionale pickup_date. Restituisce max 5 risultati con ID, data ritiro, orario, stato, totale.</div>
+  </div>
+
+  <h3 id="tool-order-update">update_order <span class="badge-new">NUOVO</span></h3>
+  <div class="tool-card new-tool">
+    <div class="tool-name">POST /vapi/orders/update</div>
+    <div class="tool-desc">Modifica orario/data di ritiro o note di un ordine. Solo ordini in stato pending o preparing. Identificazione tramite order_id o customer_phone. Campi modificabili: new_pickup_date, new_pickup_time, notes.</div>
   </div>
 
   <h3 id="tool-menu">get_menu</h3>
   <div class="tool-card">
     <div class="tool-name">POST /vapi/menu</div>
-    <div class="tool-desc">Restituisce tutti i piatti disponibili (available=1), opzionalmente filtrati per categoria. Include ID, nome e prezzo.</div>
+    <div class="tool-desc">Restituisce tutti i piatti disponibili (available=1), opzionalmente filtrati per categoria. Include ID, nome e prezzo. Necessario prima di create_order per ottenere gli ID piatto.</div>
   </div>
 
   <h3 id="tool-availability">check_availability</h3>
   <div class="tool-card">
     <div class="tool-name">POST /vapi/availability</div>
-    <div class="tool-desc">Verifica tavoli liberi per una data. Opzionalmente filtra per orario e numero ospiti minimi.</div>
+    <div class="tool-desc">Verifica tavoli liberi per una data. Opzionalmente filtra per orario e numero ospiti minimi. Risponde con il conteggio dei tavoli disponibili.</div>
+  </div>
+
+  <h3 id="tool-allergens">get_allergens</h3>
+  <div class="tool-card">
+    <div class="tool-name">POST /vapi/allergens</div>
+    <div class="tool-desc">Restituisce la lista dei 14 allergeni EU registrati nel sistema. Usare solo se il cliente chiede esplicitamente degli allergeni presenti.</div>
   </div>
 
 </main>
