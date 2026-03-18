@@ -605,9 +605,10 @@ function renderMenu() {
       </div>
       ${item.description ? `<div class="mic-desc">${item.description}</div>` : ''}
       <div class="mic-actions">
-        <label class="toggle-switch" title="${item.available ? 'Disponibile' : 'Non disponibile'}">
-          <input type="checkbox" ${item.available ? 'checked' : ''} onchange="toggleMenuItem(${item.id}, this.checked)">
+        <label class="toggle-switch">
+          <input type="checkbox" ${item.available ? 'checked' : ''} onchange="toggleMenuItem(${item.id}, this.checked, this)">
           <span class="toggle-slider"></span>
+          <span class="toggle-label">${item.available ? 'Disponibile' : 'Non disp.'}</span>
         </label>
         <button class="btn-icon" title="Modifica" onclick="editMenuItem(${item.id})"><i class="bi bi-pencil"></i></button>
         <button class="btn-icon danger" title="Elimina" onclick="deleteMenuItem(${item.id})"><i class="bi bi-trash3"></i></button>
@@ -621,14 +622,19 @@ function setMenuFilter(cat) {
   renderMenu();
 }
 
-async function toggleMenuItem(id, available) {
+async function toggleMenuItem(id, available, checkboxEl) {
   try {
     await apiFetch(`/api/menu/${id}`, { method: 'PATCH', body: { available: available ? 1 : 0 } });
     const item = menuItems.find(i => i.id === id);
     if (item) item.available = available ? 1 : 0;
-    renderMenu();
+    // Update label without full re-render
+    if (checkboxEl) {
+      const label = checkboxEl.closest('.toggle-switch')?.querySelector('.toggle-label');
+      if (label) label.textContent = available ? 'Disponibile' : 'Non disp.';
+    }
   } catch (e) {
     toast('Errore: ' + e.message, 'error');
+    renderMenu();
   }
 }
 
