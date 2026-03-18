@@ -75,6 +75,7 @@ function today() {
 function countdownLabel(pickupDate, pickupTime) {
   const pickupMs = new Date(pickupDate + 'T' + pickupTime).getTime();
   const diffMin = Math.round((pickupMs - Date.now()) / 60000);
+  if (diffMin < -120 || diffMin > 1440) return ''; // oltre 2h passate o 24h future: niente etichetta
   if (diffMin < 0) return `<span class="kc-countdown soon">${Math.abs(diffMin)}m fa</span>`;
   if (diffMin < 30) return `<span class="kc-countdown soon">${diffMin}m</span>`;
   return `<span class="kc-countdown ok">${diffMin}m</span>`;
