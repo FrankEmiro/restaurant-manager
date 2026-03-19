@@ -73,6 +73,8 @@
   <a href="#tool-menu">get_menu</a>
   <a href="#tool-availability">check_availability</a>
   <a href="#tool-allergens">get_allergens</a>
+  <div class="toc-section">Segnalazioni</div>
+  <a href="#tool-complaint-create">create_complaint ✦</a>
 </aside>
 
 <main>
@@ -100,6 +102,7 @@
     <div><div class="endpoint"><span class="method">POST</span>/vapi/menu</div></div>
     <div><div class="endpoint"><span class="method">POST</span>/vapi/availability</div></div>
     <div><div class="endpoint"><span class="method">POST</span>/vapi/allergens</div></div>
+    <div><div class="endpoint"><span class="method">POST</span>/vapi/complaints/create <span class="badge-new">NUOVO</span></div></div>
   </div>
 
   <!-- SYSTEM PROMPT -->
@@ -157,6 +160,10 @@ Usa i tool disponibili per:
 ### ALLERGIE E DIETE
 - **Informarsi sugli allergeni** → tool `get_allergens`
   Quando il cliente chiede degli allergeni presenti. Non chiedere proattivamente: registra le allergie solo se il cliente le comunica spontaneamente
+
+### SEGNALAZIONI
+- **Registrare una segnalazione** → tool `create_complaint`
+  Quando un cliente chiama per segnalare un problema con un ordine (ordine sbagliato, ritardo, qualità, articoli mancanti). Raccogli: nome, telefono, tipo problema, descrizione. Se il cliente ricorda l'ID ordine aggiungilo. Rassicura che lo staff lo ricontatterà.
 
 ## REGOLE DI COMPORTAMENTO
 - Sii breve nelle risposte vocali: massimo 2-3 frasi
@@ -388,6 +395,30 @@ Usa i tool disponibili per:
       "method": "POST",
       "parameters": { "type": "object", "properties": {} }
     }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "create_complaint",
+      "description": "Registra una segnalazione di un cliente che ha avuto un problema con un ordine (ordine sbagliato, ritardo, qualità, articoli mancanti). Usare quando il cliente chiama per lamentarsi di un ordine già effettuato.",
+      "url": "https://TUO-DOMINIO/vapi/complaints/create",
+      "method": "POST",
+      "parameters": {
+        "type": "object",
+        "required": ["customer_name", "customer_phone", "type", "description"],
+        "properties": {
+          "customer_name":  { "type": "string",  "description": "Nome e cognome del cliente" },
+          "customer_phone": { "type": "string",  "description": "Numero di telefono del cliente" },
+          "type": {
+            "type": "string",
+            "description": "Tipo di problema",
+            "enum": ["ordine_sbagliato", "ritardo", "qualita", "mancanza_articoli", "altro"]
+          },
+          "description": { "type": "string",  "description": "Descrizione del problema riportata dal cliente" },
+          "order_id":    { "type": "integer", "description": "ID dell'ordine di riferimento (se il cliente lo conosce)" }
+        }
+      }
+    }
   }
 ]</pre>
   </div>
@@ -468,6 +499,16 @@ Usa i tool disponibili per:
   <div class="tool-card">
     <div class="tool-name">POST /vapi/allergens</div>
     <div class="tool-desc">Restituisce la lista dei 14 allergeni EU registrati nel sistema. Usare solo se il cliente chiede esplicitamente degli allergeni presenti.</div>
+  </div>
+
+  <h3 id="tool-complaint-create">create_complaint <span class="badge-new">NUOVO</span></h3>
+  <div class="tool-card new-tool">
+    <div class="tool-name">POST /vapi/complaints/create</div>
+    <div class="tool-desc">
+      Registra una segnalazione di un cliente. Campi obbligatori: customer_name, customer_phone, type, description.<br>
+      Tipi validi: <code>ordine_sbagliato</code> · <code>ritardo</code> · <code>qualita</code> · <code>mancanza_articoli</code> · <code>altro</code><br>
+      Campo opzionale: order_id (ID ordine di riferimento). La segnalazione viene creata con status "aperta" e appare nella sezione Segnalazioni della dashboard.
+    </div>
   </div>
 
 </main>

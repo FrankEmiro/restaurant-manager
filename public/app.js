@@ -83,7 +83,7 @@ function countdownLabel(pickupDate, pickupTime) {
 
 // ─── ROUTER ─────────────────────────────────────
 
-const views = ['dashboard', 'cucina', 'mappa', 'editor', 'menu', 'allergeni', 'agenda'];
+const views = ['dashboard', 'cucina', 'mappa', 'editor', 'menu', 'allergeni', 'agenda', 'segnalazioni'];
 let activeView = 'dashboard';
 
 // ─── AUTO-REFRESH ────────────────────────────────
@@ -122,7 +122,8 @@ function loadView(view) {
     case 'editor': loadEditor(); break;
     case 'menu': loadMenu(); break;
     case 'allergeni': loadAllergens(); break;
-    case 'agenda': loadAgenda(); break;
+    case 'agenda':        loadAgenda();      break;
+    case 'segnalazioni':  loadComplaints();  break;
   }
 }
 
@@ -1081,6 +1082,170 @@ async function loadAgendaOrders() {
         <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${o.notes || ''}">${o.notes || '—'}</td>
       </tr>
     `).join('');
+  } catch (e) {
+    toast('Errore: ' + e.message, 'error');
+  }
+}
+
+// ─── SEGNALAZIONI ────────────────────────────────
+
+const COMPLAINT_TYPE_LABEL = {
+  ordine_sbagliato:  'Ordine sbagliato',
+  ritardo:           'Ritardo consegna',
+  qualita:           'Qualità del cibo',
+  mancanza_articoli: 'Articoli mancanti',
+  altro:             'Altro',
+};
+
+let currentComplaintId = null;
+
+async function loadComplaints() {
+  const status = document.getElementById('complaint-filter-status')?.value || '';
+  const params = new URLSearchParams();
+  if (status) params.set('status', status);
+  try {
+    const rows = await apiFetch('/api/complaints?' + params);
+
+    // Stats
+    const all = status ? await apiFetch('/api/complaints') : rows;
+    document.getElementById('complaint-stat-aperte').textContent   = all.filter(r => r.status === 'aperta').length;
+    document.getElementById('complaint-stat-gestione').textContent = all.filter(r => r.status === 'in_gestione').length;
+    document.getElementById('complaint-stat-risolte').textContent  = all.filter(r => r.status === 'risolta').length;
+
+    const list = document.getElementById('complaint-list');
+    if (rows.length === 0) {
+      list.innerHTML = '<div style="text-align:center;padding:48px;color:var(--text-muted)"><i class="bi bi-check-circle" style="font-size:40px;opacity:0.3;display:block;margin-bottom:12px"></i>Nessuna segnalazione</div>';
+      return;
+    }
+    list.innerHTML = rows.map(c => {
+      const statusCls = { aperta: 'complaint-open', in_gestione: 'complaint-wip', risolta: 'complaint-done' }[c.status] || '';
+      const statusBadgeMap = { aperta: 'badge-red', in_gestione: 'badge-yellow', risolta: 'badge-green' };
+      const statusLabelMap = { aperta: 'Aperta', in_gestione: 'In gestione', risolta: 'Risolta' };
+      return `
+      <div class="complaint-card ${statusCls}">
+        <div class="complaint-card-header">
+          <div>
+            <div class="complaint-type">${COMPLAINT_TYPE_LABEL[c.type] || c.type}</div>
+            <div class="complaint-customer">
+              <i class="bi bi-person"></i> <strong>${c.customer_name}</strong>
+              &nbsp;·&nbsp;<i class="bi bi-telephone"></i> ${c.customer_phone}
+              ${c.order_id ? `&nbsp;·&nbsp;<i class="bi bi-bag"></i> Ordine #${c.order_id}` : ''}
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+            <span class="badge ${statusBadgeMap[c.status]}">${statusLabelMap[c.status]}</span>
+            <span style="font-size:11px;color:var(--text-light)">${formatDateTime(c.created_at)}</span>
+          </div>
+        </div>
+        <div class="complaint-desc">${c.description}</div>
+        ${c.staff_notes ? `<div class="complaint-staff-note"><i class="bi bi-sticky"></i> ${c.staff_notes}</div>` : ''}
+        <div class="complaint-actions">
+          <button class="btn-icon" title="Dettaglio / Gestisci" onclick="openComplaintModal(${c.id})">
+            <i class="bi bi-pencil"></i>
+          </button>
+          ${c.status !== 'in_gestione' && c.status !== 'risolta' ? `<button class="btn btn-sm btn-warning" onclick="setComplaintStatus(${c.id},'in_gestione')"><i class="bi bi-hourglass-split"></i> Prendi in carico</button>` : ''}
+          ${c.status !== 'risolta' ? `<button class="btn btn-sm btn-success" onclick="setComplaintStatus(${c.id},'risolta')"><i class="bi bi-check-lg"></i> Risolvi</button>` : ''}
+          <button class="btn-icon danger" title="Elimina" onclick="deleteComplaint(${c.id})"><i class="bi bi-trash3"></i></button>
+        </div>
+      </div>`;
+    }).join('');
+  } catch (e) {
+    toast('Errore caricamento segnalazioni: ' + e.message, 'error');
+  }
+}
+
+async function setComplaintStatus(id, status) {
+  try {
+    await apiFetch(`/api/complaints/${id}`, { method: 'PATCH', body: { status } });
+    loadComplaints();
+  } catch (e) {
+    toast('Errore: ' + e.message, 'error');
+  }
+}
+
+async function deleteComplaint(id) {
+  if (!confirm('Eliminare questa segnalazione?')) return;
+  try {
+    await apiFetch(`/api/complaints/${id}`, { method: 'DELETE' });
+    toast('Segnalazione eliminata');
+    loadComplaints();
+  } catch (e) {
+    toast('Errore: ' + e.message, 'error');
+  }
+}
+
+async function openComplaintModal(id) {
+  try {
+    const c = await apiFetch(`/api/complaints/${id}`);
+    currentComplaintId = id;
+    const statusLabelMap = { aperta: 'Aperta', in_gestione: 'In gestione', risolta: 'Risolta' };
+    document.getElementById('complaint-modal-title').textContent = `Segnalazione #${c.id} — ${COMPLAINT_TYPE_LABEL[c.type] || c.type}`;
+    document.getElementById('complaint-modal-body').innerHTML = `
+      <div class="form-group">
+        <label>Cliente</label>
+        <div style="padding:9px 13px;background:var(--cream);border-radius:var(--radius-sm);font-size:14px">
+          ${c.customer_name} · ${c.customer_phone}${c.order_id ? ` · Ordine #${c.order_id}` : ''}
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Stato</label>
+        <select id="cm-status">
+          <option value="aperta"      ${c.status === 'aperta'      ? 'selected' : ''}>Aperta</option>
+          <option value="in_gestione" ${c.status === 'in_gestione' ? 'selected' : ''}>In gestione</option>
+          <option value="risolta"     ${c.status === 'risolta'     ? 'selected' : ''}>Risolta</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Descrizione cliente</label>
+        <div style="padding:9px 13px;background:var(--cream);border-radius:var(--radius-sm);font-size:14px;line-height:1.5">${c.description}</div>
+      </div>
+      <div class="form-group">
+        <label>Note staff</label>
+        <textarea id="cm-notes" placeholder="Come è stato gestito, soluzione adottata...">${c.staff_notes || ''}</textarea>
+      </div>
+    `;
+    document.getElementById('modal-complaint').style.display = 'flex';
+  } catch (e) {
+    toast('Errore: ' + e.message, 'error');
+  }
+}
+
+async function saveComplaintNotes() {
+  if (!currentComplaintId) return;
+  try {
+    await apiFetch(`/api/complaints/${currentComplaintId}`, {
+      method: 'PATCH',
+      body: {
+        status: document.getElementById('cm-status').value,
+        staff_notes: document.getElementById('cm-notes').value.trim(),
+      }
+    });
+    closeModal('modal-complaint');
+    toast('Segnalazione aggiornata');
+    loadComplaints();
+  } catch (e) {
+    toast('Errore: ' + e.message, 'error');
+  }
+}
+
+function openNewComplaintModal() {
+  document.getElementById('complaint-form').reset();
+  document.getElementById('modal-new-complaint').style.display = 'flex';
+}
+
+async function submitComplaint() {
+  const body = {
+    customer_name:  document.getElementById('nc-name').value.trim(),
+    customer_phone: document.getElementById('nc-phone').value.trim(),
+    type:           document.getElementById('nc-type').value,
+    description:    document.getElementById('nc-description').value.trim(),
+    order_id:       document.getElementById('nc-order-id').value || null,
+  };
+  try {
+    await apiFetch('/api/complaints', { method: 'POST', body });
+    closeModal('modal-new-complaint');
+    toast('Segnalazione registrata');
+    loadComplaints();
   } catch (e) {
     toast('Errore: ' + e.message, 'error');
   }

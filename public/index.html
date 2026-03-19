@@ -47,6 +47,10 @@
       <i class="bi bi-shield-exclamation icon"></i>
       <span>Allergeni</span>
     </a>
+    <a data-view="segnalazioni">
+      <i class="bi bi-exclamation-circle icon"></i>
+      <span>Segnalazioni</span>
+    </a>
   </nav>
   <div class="sidebar-footer">
     <button class="btn btn-logout" onclick="logout()">
@@ -338,6 +342,49 @@
     </div>
   </section>
 
+  <!-- ══ SEGNALAZIONI ══ -->
+  <section id="view-segnalazioni" class="view">
+    <div class="view-header">
+      <h2>Segnalazioni clienti</h2>
+      <div style="display:flex;gap:8px;align-items:center">
+        <select id="complaint-filter-status" class="complaint-filter-select" onchange="loadComplaints()">
+          <option value="">Tutti gli stati</option>
+          <option value="aperta">Aperte</option>
+          <option value="in_gestione">In gestione</option>
+          <option value="risolta">Risolte</option>
+        </select>
+        <button class="btn btn-outline" onclick="loadComplaints()">
+          <i class="bi bi-arrow-clockwise"></i> Aggiorna
+        </button>
+        <button class="btn btn-primary" onclick="openNewComplaintModal()">
+          <i class="bi bi-plus-lg"></i> Nuova segnalazione
+        </button>
+      </div>
+    </div>
+
+    <div class="stats-grid" style="grid-template-columns:repeat(3,1fr)">
+      <div class="stat-card" style="border-left-color:var(--danger)">
+        <div class="stat-icon" style="color:var(--danger)"><i class="bi bi-exclamation-circle"></i></div>
+        <div class="label">Aperte</div>
+        <div class="value" id="complaint-stat-aperte" style="color:var(--danger)">—</div>
+      </div>
+      <div class="stat-card" style="border-left-color:var(--warning)">
+        <div class="stat-icon" style="color:var(--warning)"><i class="bi bi-hourglass-split"></i></div>
+        <div class="label">In gestione</div>
+        <div class="value" id="complaint-stat-gestione" style="color:var(--warning)">—</div>
+      </div>
+      <div class="stat-card success">
+        <div class="stat-icon"><i class="bi bi-check-circle"></i></div>
+        <div class="label">Risolte</div>
+        <div class="value" id="complaint-stat-risolte">—</div>
+      </div>
+    </div>
+
+    <div class="complaint-list" id="complaint-list">
+      <div style="text-align:center;padding:48px;color:var(--text-muted)">Caricamento...</div>
+    </div>
+  </section>
+
 </main>
 
 <!-- ─── MODALS ─── -->
@@ -578,6 +625,70 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-outline" onclick="closeModal('modal-allergen')">Annulla</button>
         <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Salva</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Complaint Detail Modal -->
+<div id="modal-complaint" class="modal-backdrop" style="display:none">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="complaint-modal-title">Segnalazione</h3>
+      <button class="modal-close" onclick="closeModal('modal-complaint')"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="modal-body" id="complaint-modal-body"></div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-outline" onclick="closeModal('modal-complaint')">Chiudi</button>
+      <button type="button" class="btn btn-primary" onclick="saveComplaintNotes()">
+        <i class="bi bi-check-lg"></i> Salva
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- New Complaint Modal -->
+<div id="modal-new-complaint" class="modal-backdrop" style="display:none">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Nuova segnalazione</h3>
+      <button class="modal-close" onclick="closeModal('modal-new-complaint')"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <form id="complaint-form" onsubmit="event.preventDefault(); submitComplaint()">
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nome cliente *</label>
+            <input type="text" id="nc-name" required placeholder="Mario Rossi">
+          </div>
+          <div class="form-group">
+            <label>Telefono *</label>
+            <input type="tel" id="nc-phone" required placeholder="3331234567">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Tipo problema *</label>
+          <select id="nc-type" required>
+            <option value="">— Seleziona tipo —</option>
+            <option value="ordine_sbagliato">Ordine sbagliato</option>
+            <option value="ritardo">Ritardo consegna</option>
+            <option value="qualita">Qualità del cibo</option>
+            <option value="mancanza_articoli">Articoli mancanti</option>
+            <option value="altro">Altro</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>ID ordine (opzionale)</label>
+          <input type="number" id="nc-order-id" placeholder="es. 42" min="1">
+        </div>
+        <div class="form-group">
+          <label>Descrizione *</label>
+          <textarea id="nc-description" required placeholder="Descrivi il problema del cliente..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeModal('modal-new-complaint')">Annulla</button>
+        <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Registra</button>
       </div>
     </form>
   </div>

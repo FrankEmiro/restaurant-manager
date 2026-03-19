@@ -375,4 +375,26 @@ router.post('/availability', vapiMiddleware, (req, res) => {
   }
 });
 
+// POST /vapi/complaints/create
+router.post('/complaints/create', vapiMiddleware, (req, res) => {
+  try {
+    const { customer_name, customer_phone, order_id, type, description } = req.vapiParams;
+    if (!customer_name || !customer_phone || !type || !description) {
+      return res.vapiError('Dati mancanti. Servono: nome cliente, telefono, tipo problema e descrizione.');
+    }
+    const validTypes = ['ordine_sbagliato', 'ritardo', 'qualita', 'mancanza_articoli', 'altro'];
+    if (!validTypes.includes(type)) {
+      return res.vapiError(`Tipo non valido. Usa uno di: ${validTypes.join(', ')}.`);
+    }
+    const now = new Date().toISOString();
+    const result = db.prepare(`
+      INSERT INTO complaints (customer_name, customer_phone, order_id, type, description, status, created_at)
+      VALUES (?, ?, ?, ?, ?, 'aperta', ?)
+    `).run(customer_name, customer_phone, order_id || null, type, description, now);
+    res.vapiSuccess(`Segnalazione registrata con successo. ID: ${result.lastInsertRowid}. Il nostro staff la contatterà al più presto per risolvere il problema. Ci scusiamo per l'inconveniente.`);
+  } catch (err) {
+    res.vapiError('Errore interno: ' + err.message);
+  }
+});
+
 module.exports = router;

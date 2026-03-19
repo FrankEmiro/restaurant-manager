@@ -81,6 +81,18 @@ db.exec(`
     allergen_id INTEGER REFERENCES allergens(id),
     allergen_name TEXT NOT NULL
   );
+
+  CREATE TABLE IF NOT EXISTS complaints (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    customer_name TEXT NOT NULL,
+    customer_phone TEXT NOT NULL,
+    order_id INTEGER REFERENCES takeaway_orders(id),
+    type TEXT NOT NULL,
+    description TEXT NOT NULL,
+    status TEXT DEFAULT 'aperta',
+    staff_notes TEXT,
+    created_at TEXT
+  );
 `);
 
 // Add vegetarian/vegan columns if not exist (safe migration)
