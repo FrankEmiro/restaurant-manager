@@ -378,11 +378,13 @@ router.post('/availability', vapiMiddleware, (req, res) => {
 // POST /vapi/complaints/create
 router.post('/complaints/create', vapiMiddleware, (req, res) => {
   try {
-    const { customer_name, customer_phone, order_id, type, description } = req.vapiParams;
+    const p = req.vapiParams;
+    const { customer_name, customer_phone, order_id, description } = p;
+    const type = p.issue_type || p.type;
     if (!customer_name || !customer_phone || !type || !description) {
       return res.vapiError('Dati mancanti. Servono: nome cliente, telefono, tipo problema e descrizione.');
     }
-    const validTypes = ['ordine_sbagliato', 'ritardo', 'qualita', 'mancanza_articoli', 'altro'];
+    const validTypes = ['ordine_sbagliato', 'ritardo', 'qualita', 'qualita_scarsa', 'mancanza_articoli', 'altro'];
     if (!validTypes.includes(type)) {
       return res.vapiError(`Tipo non valido. Usa uno di: ${validTypes.join(', ')}.`);
     }

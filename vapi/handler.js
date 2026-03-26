@@ -33,12 +33,14 @@ function vapiError(toolCallId, message) {
 }
 
 function vapiMiddleware(req, res, next) {
+  console.log('[VAPI RAW BODY]', JSON.stringify(req.body, null, 2));
+
   let toolCallId = 'unknown';
   let vapiParams = {};
 
   // VAPI production format: message.toolCallList
   // NOTE: VAPI sends arguments as already-parsed object (not JSON string)
-  const toolCallList = req.body?.message?.toolCallList;
+  const toolCallList = req.body?.message?.toolCallList || req.body?.message?.toolCalls;
   if (Array.isArray(toolCallList) && toolCallList.length > 0) {
     const call = toolCallList[0];
     toolCallId = call.id || 'unknown';
