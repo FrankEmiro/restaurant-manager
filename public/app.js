@@ -31,6 +31,14 @@ async function apiFetch(path, opts = {}) {
   return data;
 }
 
+// Escape HTML: ogni testo che arriva dai clienti (nomi, note, descrizioni) passa da qui
+// prima di finire in innerHTML. Senza, un nome tipo <img onerror=...> eseguirebbe codice.
+function esc(v) {
+  return String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+// Per stringhe dentro onclick="fn('...')": JSON + escape HTML
+function jsArg(v) { return esc(JSON.stringify(String(v ?? ''))); }
+
 function toast(msg, type = 'success') {
   const el = document.createElement('div');
   el.className = `toast ${type}`;
@@ -155,10 +163,10 @@ async function loadDashboard() {
     } else {
       resBody.innerHTML = activeRes.map(r => `
         <tr>
-          <td><strong>${r.customer_name}</strong><br><small style="color:var(--text-muted)">${r.customer_phone}</small></td>
+          <td><strong>${esc(r.customer_name)}</strong><br><small style="color:var(--text-muted)">${esc(r.customer_phone)}</small></td>
           <td>${r.time}</td>
           <td>${r.guests}</td>
-          <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.notes || ''}">${r.notes || '—'}</td>
+          <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(r.notes) || ''}">${esc(r.notes) || '—'}</td>
           <td>${statusBadge(r.status)}</td>
           <td>
             <div class="row-actions">
@@ -180,15 +188,15 @@ async function loadDashboard() {
       const nextLabel = { pending: 'Prepara', preparing: 'Pronto', ready: 'Archivia' };
       ordersBody.innerHTML = orders.map(o => {
         const allergenBadge = (o.allergens && o.allergens.length > 0)
-          ? `<br><span style="color:#dc2626;font-size:11px;font-weight:600"><i class="bi bi-exclamation-triangle-fill"></i> ${o.allergens.map(a => a.allergen_name).join(', ')}</span>`
+          ? `<br><span style="color:#dc2626;font-size:11px;font-weight:600"><i class="bi bi-exclamation-triangle-fill"></i> ${o.allergens.map(a => esc(a.allergen_name)).join(', ')}</span>`
           : '';
         return `
         <tr>
-          <td><strong>${o.customer_name}</strong><br><small style="color:var(--text-muted)">${o.customer_phone}</small>${allergenBadge}</td>
+          <td><strong>${esc(o.customer_name)}</strong><br><small style="color:var(--text-muted)">${esc(o.customer_phone)}</small>${allergenBadge}</td>
           <td>${o.pickup_time}</td>
           <td>${statusBadge(o.status)}</td>
           <td>€${(o.total || 0).toFixed(2)}</td>
-          <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${o.notes || ''}">${o.notes || '—'}</td>
+          <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(o.notes) || ''}">${esc(o.notes) || '—'}</td>
           <td>
             <div class="row-actions">
               ${nextStatus[o.status] ? `<button class="btn-icon" title="${nextLabel[o.status]}" onclick="advanceOrderStatus(${o.id},'${nextStatus[o.status]}')"><i class="bi ${nextIcon[o.status]}"></i></button>` : ''}
@@ -271,7 +279,7 @@ async function renderKitchen() {
 
     grid.innerHTML = active.map(o => {
       const items = (o.items || []).map(i =>
-        `<div class="kc-item"><span class="kc-qty">${i.quantity}</span>${i.item_name}</div>`
+        `<div class="kc-item"><span class="kc-qty">${i.quantity}</span>${esc(i.item_name)}</div>`
       ).join('');
 
       let actions = '';
@@ -284,7 +292,7 @@ async function renderKitchen() {
       }
 
       const allergenBanner = (o.allergens && o.allergens.length > 0)
-        ? `<div class="kc-allergens"><i class="bi bi-exclamation-triangle-fill"></i> ALLERGIE: ${o.allergens.map(a => a.allergen_name).join(', ')}</div>`
+        ? `<div class="kc-allergens"><i class="bi bi-exclamation-triangle-fill"></i> ALLERGIE: ${o.allergens.map(a => esc(a.allergen_name)).join(', ')}</div>`
         : '';
 
       const statusLabel = o.status === 'pending' ? '<i class="bi bi-hourglass-split"></i> In attesa'
@@ -294,10 +302,10 @@ async function renderKitchen() {
       return `
         <div class="kitchen-card ${o.status}">
           <div class="kc-status">${statusLabel}</div>
-          <div class="kc-customer">${o.customer_name}</div>
+          <div class="kc-customer">${esc(o.customer_name)}</div>
           <div class="kc-time">Ritiro: ${o.pickup_time} ${countdownLabel(o.pickup_date, o.pickup_time)}</div>
           ${allergenBanner}
-          ${o.notes ? `<div class="kc-notes"><i class="bi bi-sticky"></i> ${o.notes}</div>` : ''}
+          ${o.notes ? `<div class="kc-notes"><i class="bi bi-sticky"></i> ${esc(o.notes)}</div>` : ''}
           <div class="kc-items">${items}</div>
           <div class="kc-actions">${actions}</div>
         </div>`;
@@ -354,7 +362,7 @@ function renderMap() {
         style="left:${t.x}%;top:${t.y}%;width:${size}px;height:${size}px"
         data-id="${t.id}"
         onclick="showTablePopup(event, ${t.id})">
-        <div class="t-number">${t.number}</div>
+        <div class="t-number">${esc(t.number)}</div>
         <div class="t-cap">${res ? res.time : t.capacity + 'p'}</div>
       </div>`;
   }).join('');
@@ -371,9 +379,9 @@ function showTablePopup(e, tableId) {
 
   const resBlock = res ? `
     <div style="background:#fef3c7;border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:13px">
-      <strong>${res.customer_name}</strong> · ${res.guests} persone<br>
-      🕐 ${res.time}${res.customer_phone ? ' · ' + res.customer_phone : ''}
-      ${res.notes ? `<br><span style="color:#92400e">📝 ${res.notes}</span>` : ''}
+      <strong>${esc(res.customer_name)}</strong> · ${res.guests} persone<br>
+      🕐 ${esc(res.time)}${res.customer_phone ? ' · ' + esc(res.customer_phone) : ''}
+      ${res.notes ? `<br><span style="color:#92400e">📝 ${esc(res.notes)}</span>` : ''}
     </div>` : '';
 
   const statusOptions = ['free', 'occupied', 'reserved'].map(s =>
@@ -387,7 +395,7 @@ function showTablePopup(e, tableId) {
   popup.id = 'table-popup';
   popup.innerHTML = `
     <button class="popup-close" onclick="closePopup()">×</button>
-    <h3>${table.number}</h3>
+    <h3>${esc(table.number)}</h3>
     <div class="popup-sub">Capacità: ${table.capacity} posti · ${table.shape === 'round' ? 'Rotondo' : 'Quadrato'}</div>
     ${resBlock}
     <div class="popup-info" style="margin-bottom:10px">Stato: ${statusBadge(status)}</div>
@@ -441,7 +449,7 @@ function renderEditor() {
         data-id="${t.id}"
         onmousedown="startDrag(event, ${t.id})"
         onclick="selectEditorTable(event, ${t.id})">
-        <div class="t-number">${t.number}</div>
+        <div class="t-number">${esc(t.number)}</div>
         <div class="t-cap">${t.capacity}p</div>
       </div>`;
   }).join('');
@@ -580,7 +588,7 @@ function renderMenu() {
   const categories = ['all', ...new Set(menuItems.map(i => i.category).filter(Boolean))];
   const catBar = document.getElementById('menu-categories');
   catBar.innerHTML = categories.map(c =>
-    `<button class="menu-category-btn ${menuFilter === c ? 'active' : ''}" onclick="setMenuFilter('${c}')">${c === 'all' ? 'Tutti' : c}</button>`
+    `<button class="menu-category-btn ${menuFilter === c ? 'active' : ''}" onclick="setMenuFilter(${jsArg(c)})">${c === 'all' ? 'Tutti' : esc(c)}</button>`
   ).join('');
 
   const filtered = menuFilter === 'all' ? menuItems : menuItems.filter(i => i.category === menuFilter);
@@ -600,12 +608,12 @@ function renderMenu() {
     <div class="menu-item-card ${item.available ? '' : 'unavailable'}">
       <div class="mic-header">
         <div>
-          <div class="mic-cat">${item.category || ''}${badges ? ' ' + badges : ''}</div>
-          <div class="mic-name">${item.name}</div>
+          <div class="mic-cat">${esc(item.category) || ''}${badges ? ' ' + badges : ''}</div>
+          <div class="mic-name">${esc(item.name)}</div>
         </div>
         <div class="mic-price">€${item.price.toFixed(2)}</div>
       </div>
-      ${item.description ? `<div class="mic-desc">${item.description}</div>` : ''}
+      ${item.description ? `<div class="mic-desc">${esc(item.description)}</div>` : ''}
       <div class="mic-actions">
         <label class="toggle-switch">
           <input type="checkbox" ${item.available ? 'checked' : ''} onchange="toggleMenuItem(${item.id}, this.checked, this)">
@@ -719,7 +727,7 @@ async function openAddOrderModal() {
   document.getElementById('ord-allergen-list').innerHTML = allergens.map(a => `
     <label class="check-label">
       <input type="checkbox" name="ord-allergen" value="${a.id}">
-      ${a.name}
+      ${esc(a.name)}
     </label>
   `).join('');
 
@@ -736,9 +744,9 @@ async function openAddOrderModal() {
   }
   select.innerHTML = '<option value="">— Seleziona piatto —</option>' +
     Object.entries(grouped).map(([cat, items]) =>
-      `<optgroup label="${cat}">${items.map(i =>
-        `<option value="${i.id}" data-price="${i.price}" data-name="${i.name}">
-          ${i.name} — €${i.price.toFixed(2)}
+      `<optgroup label="${esc(cat)}">${items.map(i =>
+        `<option value="${i.id}" data-price="${i.price}" data-name="${esc(i.name)}">
+          ${esc(i.name)} — €${i.price.toFixed(2)}
         </option>`
       ).join('')}</optgroup>`
     ).join('');
@@ -783,7 +791,7 @@ function renderOrderItems() {
   }
   list.innerHTML = orderItems.map((item, idx) => `
     <div class="order-item-row">
-      <span class="oir-name">${item.name}</span>
+      <span class="oir-name">${esc(item.name)}</span>
       <span class="oir-qty">${item.quantity} × €${item.price.toFixed(2)}</span>
       <span class="oir-price">€${(item.price * item.quantity).toFixed(2)}</span>
       <button type="button" class="oir-remove" onclick="removeOrderItem(${idx})">×</button>
@@ -849,7 +857,7 @@ async function populateTableSelect(selectedTableId) {
   select.innerHTML = '<option value="">— Da assegnare —</option>' +
     tables.map(t =>
       `<option value="${t.id}" ${t.id === selectedTableId ? 'selected' : ''}>
-        ${t.number} (${t.capacity} posti)
+        ${esc(t.number)} (${t.capacity} posti)
       </option>`
     ).join('');
 }
@@ -916,8 +924,8 @@ function renderAllergens() {
     <div class="allergen-card">
       <div class="allergen-number">${i + 1}</div>
       <div class="allergen-body">
-        <div class="allergen-name">${a.name}</div>
-        ${a.description ? `<div class="allergen-desc">${a.description}</div>` : ''}
+        <div class="allergen-name">${esc(a.name)}</div>
+        ${a.description ? `<div class="allergen-desc">${esc(a.description)}</div>` : ''}
       </div>
       <div class="allergen-actions">
         <button class="btn-icon" title="Modifica" onclick="editAllergen(${a.id})"><i class="bi bi-pencil"></i></button>
@@ -1029,10 +1037,10 @@ async function loadAgendaReservations() {
       <tr>
         <td>${formatDate(r.date)}</td>
         <td>${r.time}</td>
-        <td><strong>${r.customer_name}</strong><br><small style="color:var(--text-muted)">${r.customer_phone}</small></td>
+        <td><strong>${esc(r.customer_name)}</strong><br><small style="color:var(--text-muted)">${esc(r.customer_phone)}</small></td>
         <td>${r.guests}</td>
-        <td>${r.table_number || '—'}</td>
-        <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.notes || ''}">${r.notes || '—'}</td>
+        <td>${esc(r.table_number) || '—'}</td>
+        <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(r.notes) || ''}">${esc(r.notes) || '—'}</td>
         <td>${statusBadge(r.status)}</td>
         <td>
           <div class="row-actions">
@@ -1076,10 +1084,10 @@ async function loadAgendaOrders() {
       <tr>
         <td>${formatDate(o.pickup_date)}</td>
         <td>${o.pickup_time}</td>
-        <td><strong>${o.customer_name}</strong><br><small style="color:var(--text-muted)">${o.customer_phone}</small></td>
+        <td><strong>${esc(o.customer_name)}</strong><br><small style="color:var(--text-muted)">${esc(o.customer_phone)}</small></td>
         <td>${statusBadge(o.status)}</td>
         <td>€${(o.total || 0).toFixed(2)}</td>
-        <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${o.notes || ''}">${o.notes || '—'}</td>
+        <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(o.notes) || ''}">${esc(o.notes) || '—'}</td>
       </tr>
     `).join('');
   } catch (e) {
@@ -1125,10 +1133,10 @@ async function loadComplaints() {
       <div class="complaint-card ${statusCls}">
         <div class="complaint-card-header">
           <div>
-            <div class="complaint-type">${COMPLAINT_TYPE_LABEL[c.type] || c.type}</div>
+            <div class="complaint-type">${esc(COMPLAINT_TYPE_LABEL[c.type] || c.type)}</div>
             <div class="complaint-customer">
-              <i class="bi bi-person"></i> <strong>${c.customer_name}</strong>
-              &nbsp;·&nbsp;<i class="bi bi-telephone"></i> ${c.customer_phone}
+              <i class="bi bi-person"></i> <strong>${esc(c.customer_name)}</strong>
+              &nbsp;·&nbsp;<i class="bi bi-telephone"></i> ${esc(c.customer_phone)}
               ${c.order_id ? `&nbsp;·&nbsp;<i class="bi bi-bag"></i> Ordine #${c.order_id}` : ''}
             </div>
           </div>
@@ -1137,8 +1145,8 @@ async function loadComplaints() {
             <span style="font-size:11px;color:var(--text-light)">${formatDateTime(c.created_at)}</span>
           </div>
         </div>
-        <div class="complaint-desc">${c.description}</div>
-        ${c.staff_notes ? `<div class="complaint-staff-note"><i class="bi bi-sticky"></i> ${c.staff_notes}</div>` : ''}
+        <div class="complaint-desc">${esc(c.description)}</div>
+        ${c.staff_notes ? `<div class="complaint-staff-note"><i class="bi bi-sticky"></i> ${esc(c.staff_notes)}</div>` : ''}
         <div class="complaint-actions">
           <button class="btn-icon" title="Dettaglio / Gestisci" onclick="openComplaintModal(${c.id})">
             <i class="bi bi-pencil"></i>
@@ -1184,7 +1192,7 @@ async function openComplaintModal(id) {
       <div class="form-group">
         <label>Cliente</label>
         <div style="padding:9px 13px;background:var(--cream);border-radius:var(--radius-sm);font-size:14px">
-          ${c.customer_name} · ${c.customer_phone}${c.order_id ? ` · Ordine #${c.order_id}` : ''}
+          ${esc(c.customer_name)} · ${esc(c.customer_phone)}${c.order_id ? ` · Ordine #${c.order_id}` : ''}
         </div>
       </div>
       <div class="form-group">
@@ -1197,11 +1205,11 @@ async function openComplaintModal(id) {
       </div>
       <div class="form-group">
         <label>Descrizione cliente</label>
-        <div style="padding:9px 13px;background:var(--cream);border-radius:var(--radius-sm);font-size:14px;line-height:1.5">${c.description}</div>
+        <div style="padding:9px 13px;background:var(--cream);border-radius:var(--radius-sm);font-size:14px;line-height:1.5">${esc(c.description)}</div>
       </div>
       <div class="form-group">
         <label>Note staff</label>
-        <textarea id="cm-notes" placeholder="Come è stato gestito, soluzione adottata...">${c.staff_notes || ''}</textarea>
+        <textarea id="cm-notes" placeholder="Come è stato gestito, soluzione adottata...">${esc(c.staff_notes) || ''}</textarea>
       </div>
     `;
     document.getElementById('modal-complaint').style.display = 'flex';

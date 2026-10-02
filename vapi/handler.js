@@ -33,7 +33,7 @@ function vapiError(toolCallId, message) {
 }
 
 function vapiMiddleware(req, res, next) {
-  console.log('[VAPI RAW BODY]', JSON.stringify(req.body, null, 2));
+  if (process.env.DEBUG_API === '1') console.log('[VAPI RAW BODY]', JSON.stringify(req.body, null, 2));
 
   let toolCallId = 'unknown';
   let vapiParams = {};

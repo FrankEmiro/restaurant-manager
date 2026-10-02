@@ -85,8 +85,19 @@
   <h2 id="overview">Come funziona</h2>
   <p>L'agente vocale VAPI risponde alle telefonate dei clienti e chiama questi endpoint per creare, consultare e modificare prenotazioni e ordini asporto in tempo reale.</p>
   <div class="alert alert-info">
-    <strong>Nota:</strong> Gli endpoint <code>/vapi/*</code> sono sempre pubblici (no autenticazione). Le chiamate arrivano dai server VAPI, non da browser. Tutti accettano POST e restituiscono sempre HTTP 200.
+    <strong>Nota:</strong> Gli endpoint <code>/vapi/*</code> sono chiamati dai server VAPI, non da browser, e sono protetti da un <strong>segreto condiviso</strong> (header <code>x-vapi-secret</code>): senza, rispondono 401. Tutti accettano POST e, se autenticati, restituiscono sempre HTTP 200.
   </div>
+
+  <h2 id="vapi-secret">🔐 Segreto di autenticazione</h2>
+  <p>In <strong>ogni tool</strong> VAPI imposta il blocco <code>server</code> con questo URL base e questo segreto:</p>
+  <div class="code-wrap"><pre id="secret-box">Accedi all'app per vedere il segreto (questa pagina legge i dati solo se sei loggato).</pre></div>
+  <script>
+    fetch('/api/security/vapi').then(r => r.ok ? r.json() : null).then(d => {
+      if (!d) return;
+      document.getElementById('secret-box').textContent =
+        'Server URL base : ' + d.baseUrl + '\nSecret          : ' + d.secret + '\n(VAPI lo invia nell\'header ' + d.header + ')';
+    }).catch(() => {});
+  </script>
 
   <!-- ENDPOINTS -->
   <h2 id="endpoints">Endpoint disponibili</h2>

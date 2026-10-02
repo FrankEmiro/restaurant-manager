@@ -13,6 +13,12 @@ db.exec('PRAGMA foreign_keys = ON');
 
 // Create tables
 db.exec(`
+  CREATE TABLE IF NOT EXISTS settings (
+    key TEXT PRIMARY KEY,
+    value TEXT,
+    updated_at TEXT
+  );
+
   CREATE TABLE IF NOT EXISTS tables (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     number TEXT NOT NULL,

@@ -1,5 +1,5 @@
 function requireAuth(req, res, next) {
-  // Always public: VAPI tools, auth endpoints, login page
+  // Sempre pubblici: tool VAPI (protetti dal segreto condiviso in server.js), auth, pagina di login
   if (
     req.path.startsWith('/vapi/') ||
     req.path.startsWith('/api/auth/') ||

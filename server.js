@@ -2,17 +2,37 @@ const express = require('express');
 const path = require('path');
 const session = require('express-session');
 const requireAuth = require('./middleware/requireAuth');
+const { sessionSecret, vapiSecret, verifyVapiSecret } = require('./lib/security');
 
 const app = express();
 
-app.use(express.json());
+// Dietro un reverse proxy (Coolify/Traefik) serve per avere l'IP reale e il cookie "secure"
+app.set('trust proxy', 1);
+app.disable('x-powered-by');
+
+// Header di sicurezza di base
+app.use((req, res, next) => {
+  res.set({
+    'X-Content-Type-Options': 'nosniff',
+    'X-Frame-Options': 'SAMEORIGIN',
+    'Referrer-Policy': 'same-origin',
+  });
+  next();
+});
+
+app.use(express.json({ limit: '1mb' }));
 
 // 1. Session middleware
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'dev-secret',
+  secret: sessionSecret(),
   resave: false,
   saveUninitialized: false,
-  cookie: { maxAge: 8 * 60 * 60 * 1000 } // 8 ore
+  cookie: {
+    maxAge: 8 * 60 * 60 * 1000, // 8 ore
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: 'auto'
+  }
 }));
 
 // 2. Static files
@@ -31,7 +51,9 @@ app.get('/login', (req, res) => {
 app.use(requireAuth);
 
 // ─── DEBUG LOGGER ────────────────────────────────────────────────────────────
+// Attivo solo con DEBUG_API=1: i body contengono nomi e telefoni dei clienti.
 app.use((req, res, next) => {
+  if (process.env.DEBUG_API !== '1') return next();
   if (!req.path.startsWith('/api') && !req.path.startsWith('/vapi')) return next();
 
   const prefix = req.path.startsWith('/vapi') ? 'VAPI' : 'API';
@@ -59,14 +81,17 @@ app.use('/api/orders',       require('./routes/orders'));
 app.use('/api/dashboard',    require('./routes/dashboard'));
 app.use('/api/allergens',    require('./routes/allergens'));
 app.use('/api/complaints',   require('./routes/complaints'));
+app.use('/api/security',     require('./routes/security'));
 
-// 7. VAPI routes (already whitelisted in requireAuth)
-app.use('/vapi', require('./routes/vapi'));
+// 7. VAPI routes (fuori dalla sessione, protette dal segreto condiviso)
+app.use('/vapi', verifyVapiSecret, require('./routes/vapi'));
 
 // 8. SPA fallback
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
+
+vapiSecret(); // genera il segreto Vapi al primo avvio
 
 const PORT = process.env.PORT || 3000;
 const server = app.listen(PORT, () => {
