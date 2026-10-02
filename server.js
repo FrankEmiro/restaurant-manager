@@ -87,6 +87,8 @@ app.use('/api/security',     require('./routes/security'));
 app.use('/api/voice',        require('./routes/voice'));
 app.use('/api/rules',        require('./routes/rules'));
 app.use('/api/alerts',       require('./routes/alerts'));
+app.use('/api/report',       require('./routes/report'));
+app.use('/api/backup',       require('./routes/backup'));
 app.use('/print',            require('./routes/print'));
 
 // 7. VAPI routes (fuori dalla sessione, protette dal segreto condiviso)
@@ -104,6 +106,8 @@ const PORT = process.env.PORT || 3000;
 const server = app.listen(PORT, () => {
   console.log(`Restaurant Manager running at http://localhost:${PORT}`);
 });
+
+require('./lib/backup').start(); // copia automatica del database
 
 server.on('error', (err) => {
   if (err.code === 'EADDRINUSE') {

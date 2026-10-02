@@ -205,6 +205,15 @@ if (allergenCount === 0) {
   for (const [name, description] of allergens) insertAllergen.run(name, description, now);
 }
 
+// Migrazioni: da dove arriva una prenotazione/ordine ('voice' = assistente vocale, 'staff') e da quale
+// chiamata. Le righe esistenti restano 'staff'. ALTER fallisce se la colonna esiste già: va bene.
+for (const sql of [
+  "ALTER TABLE reservations ADD COLUMN source TEXT DEFAULT 'staff'",
+  "ALTER TABLE reservations ADD COLUMN call_id TEXT",
+  "ALTER TABLE takeaway_orders ADD COLUMN source TEXT DEFAULT 'staff'",
+  "ALTER TABLE takeaway_orders ADD COLUMN call_id TEXT",
+]) { try { db.exec(sql); } catch { /* già presente */ } }
+
 // Helper for manual transactions (node:sqlite has no .transaction() helper)
 db.withTransaction = function(fn) {
   db.exec('BEGIN');

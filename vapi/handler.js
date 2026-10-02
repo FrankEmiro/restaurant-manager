@@ -37,6 +37,8 @@ function vapiMiddleware(req, res, next) {
 
   let toolCallId = 'unknown';
   let vapiParams = {};
+  // Chiamata da cui arriva il tool: serve a collegare prenotazioni e ordini alle chiamate (report)
+  req.callId = req.body?.message?.call?.id || null;
 
   // VAPI production format: message.toolCallList
   // NOTE: VAPI sends arguments as already-parsed object (not JSON string)

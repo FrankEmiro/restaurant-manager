@@ -48,9 +48,13 @@
       <i class="ph-bold ph-shield-warning icon"></i>
       <span>Allergeni</span>
     </a>
+    <a data-view="report">
+      <i class="ph-bold ph-chart-line-up icon"></i>
+      <span>Report</span>
+    </a>
     <a data-view="regole">
-      <i class="ph-bold ph-clock icon"></i>
-      <span>Orari e regole</span>
+      <i class="ph-bold ph-gear icon"></i>
+      <span>Impostazioni</span>
     </a>
     <a data-view="chiamate">
       <i class="ph-bold ph-phone-call icon"></i>
@@ -368,7 +372,7 @@
   <!-- ══ ORARI E REGOLE ══ -->
   <section id="view-regole" class="view">
     <div class="view-header">
-      <h2>Orari e regole</h2>
+      <h2>Impostazioni</h2>
       <button class="btn btn-primary" onclick="saveRules()"><i class="ph-bold ph-floppy-disk"></i> Salva</button>
     </div>
     <div class="alert-note" id="rules-banner" style="display:none"></div>
@@ -407,6 +411,44 @@
         </div>
       </div>
     </div>
+  
+
+    <div class="card">
+      <div class="card-header"><h3>Backup dei dati</h3></div>
+      <div class="card-body">
+        <p class="rules-hint" id="backup-info"></p>
+        <div id="backup-list" class="backup-list"></div>
+        <div class="backup-actions">
+          <button class="btn btn-outline" onclick="backupNow()"><i class="ph-bold ph-floppy-disk"></i> Crea una copia ora</button>
+          <button class="btn btn-outline" onclick="downloadBackup()"><i class="ph-bold ph-download-simple"></i> Scarica una copia</button>
+        </div>
+        <p class="rules-hint" style="margin-top:12px">La copia scaricata contiene anche le impostazioni (compresa la chiave Vapi): conservala in un posto sicuro, non condividerla.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ REPORT ══ -->
+  <section id="view-report" class="view">
+    <div class="view-header">
+      <h2>Report</h2>
+      <select id="report-days" onchange="loadReport()" style="width:auto">
+        <option value="7">Ultimi 7 giorni</option>
+        <option value="30" selected>Ultimi 30 giorni</option>
+        <option value="90">Ultimi 90 giorni</option>
+      </select>
+    </div>
+    <div class="card report-hero" id="report-hero"></div>
+    <div class="stats-grid" id="report-kpis"></div>
+    <div class="dash-grid">
+      <div class="card"><div class="card-header"><h3>Prenotazioni</h3></div><div class="card-body" id="report-res"></div></div>
+      <div class="card"><div class="card-header"><h3>Asporto</h3></div><div class="card-body" id="report-take"></div></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><h3>Giorno per giorno</h3>
+        <span class="chart-legend"><i class="dot calls"></i> chiamate <i class="dot actions"></i> prenotazioni e ordini</span></div>
+      <div class="card-body"><div class="chart" id="report-chart"></div></div>
+    </div>
+    <div class="card"><div class="card-header"><h3>Orari più richiesti</h3></div><div class="card-body" id="report-peaks"></div></div>
   </section>
 
   <!-- ══ CHIAMATE ══ -->
@@ -860,6 +902,7 @@
 <script src="voice.js"></script>
 <script src="rules.js"></script>
 <script src="alerts.js"></script>
+<script src="report.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

@@ -18,7 +18,7 @@ router.post('/reservations/create', vapiMiddleware, (req, res) => {
     }
 
     // Controlla orari, chiusure, turni e assegna il tavolo: niente più overbooking
-    const r = booking.reserve({ customer_name, customer_phone, date, time, guests, notes });
+    const r = booking.reserve({ customer_name, customer_phone, date, time, guests, notes, source: 'voice', callId: req.callId });
     if (!r.ok) return refuse(res, r);
 
     const n = parseInt(guests, 10);
@@ -97,9 +97,9 @@ router.post('/orders/create', vapiMiddleware, (req, res) => {
     const now = new Date().toISOString();
     const orderId = db.withTransaction(() => {
       const result = db.prepare(`
-        INSERT INTO takeaway_orders (customer_name, customer_phone, pickup_date, pickup_time, notes, status, total, created_at)
-        VALUES (?, ?, ?, ?, ?, 'pending', ?, ?)
-      `).run(customer_name, customer_phone, pickup_date, pickup_time, notes, total, now);
+        INSERT INTO takeaway_orders (customer_name, customer_phone, pickup_date, pickup_time, notes, status, total, created_at, source, call_id)
+        VALUES (?, ?, ?, ?, ?, 'pending', ?, ?, 'voice', ?)
+      `).run(customer_name, customer_phone, pickup_date, pickup_time, notes, total, now, req.callId);
       const oid = result.lastInsertRowid;
       for (const item of resolvedItems) {
         db.prepare(`
