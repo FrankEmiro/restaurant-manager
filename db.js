@@ -19,6 +19,31 @@ db.exec(`
     updated_at TEXT
   );
 
+  -- Tool creati su Vapi (nome tool -> id Vapi), per aggiornarli invece di duplicarli
+  CREATE TABLE IF NOT EXISTS vapi_tools (
+    tool_name TEXT PRIMARY KEY,
+    vapi_tool_id TEXT NOT NULL,
+    synced_at TEXT
+  );
+
+  -- Registro delle chiamate (riempito dal webhook di fine chiamata)
+  CREATE TABLE IF NOT EXISTS call_logs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    vapi_call_id TEXT UNIQUE,
+    direction TEXT,
+    caller_number TEXT,
+    status TEXT,
+    ended_reason TEXT,
+    duration_seconds INTEGER DEFAULT 0,
+    cost REAL DEFAULT 0,
+    summary TEXT,
+    transcript TEXT,
+    recording_url TEXT,
+    started_at TEXT,
+    ended_at TEXT,
+    created_at TEXT DEFAULT (datetime('now'))
+  );
+
   CREATE TABLE IF NOT EXISTS tables (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     number TEXT NOT NULL,

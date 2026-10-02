@@ -48,6 +48,14 @@
       <i class="ph-bold ph-shield-warning icon"></i>
       <span>Allergeni</span>
     </a>
+    <a data-view="chiamate">
+      <i class="ph-bold ph-phone-call icon"></i>
+      <span>Chiamate</span>
+    </a>
+    <a data-view="voce">
+      <i class="ph-bold ph-microphone icon"></i>
+      <span>Assistente vocale</span>
+    </a>
     <a data-view="segnalazioni">
       <i class="ph-bold ph-warning-circle icon"></i>
       <span>Segnalazioni</span>
@@ -344,6 +352,85 @@
     </div>
   </section>
 
+
+  <!-- ══ CHIAMATE ══ -->
+  <section id="view-chiamate" class="view">
+    <div class="view-header">
+      <h2>Chiamate</h2>
+      <button class="btn btn-outline" onclick="loadCalls()"><i class="ph-bold ph-arrows-clockwise"></i> Aggiorna</button>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card accent"><div class="stat-icon"><i class="ph-bold ph-phone-incoming"></i></div><div class="label">Chiamate (30 giorni)</div><div class="value" id="calls-stat-total">—</div></div>
+      <div class="stat-card"><div class="stat-icon"><i class="ph-bold ph-timer"></i></div><div class="label">Durata media</div><div class="value" id="calls-stat-avg">—</div></div>
+      <div class="stat-card success"><div class="stat-icon"><i class="ph-bold ph-check-circle"></i></div><div class="label">Completate</div><div class="value" id="calls-stat-ok">—</div></div>
+      <div class="stat-card"><div class="stat-icon"><i class="ph-bold ph-currency-eur"></i></div><div class="label">Costo voce</div><div class="value" id="calls-stat-cost">—</div></div>
+    </div>
+    <div class="card">
+      <div style="overflow-x:auto">
+        <table class="data-table">
+          <thead><tr><th>Data</th><th>Numero</th><th>Esito</th><th>Durata</th><th>Costo</th><th>Riepilogo</th><th></th></tr></thead>
+          <tbody id="calls-body"><tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text-muted)">Caricamento...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ ASSISTENTE VOCALE ══ -->
+  <section id="view-voce" class="view">
+    <div class="view-header">
+      <h2>Assistente vocale</h2>
+    </div>
+    <div class="card"><div class="card-body" id="voice-steps"></div></div>
+
+    <div class="card">
+      <div class="card-header"><h3>Configurazione</h3></div>
+      <div class="card-body" style="display:flex;flex-direction:column;gap:16px">
+        <div class="form-row">
+          <div class="form-group"><label>Nome del locale *</label><input id="voice-name" type="text" placeholder="Trattoria da Mario"></div>
+          <div class="form-group"><label>URL pubblico dell'app *</label><input id="voice-url" type="text" placeholder="https://ristorante.tuodominio.it"></div>
+        </div>
+        <div class="form-group"><label>Chiave API Vapi *</label><input id="voice-key" type="password" autocomplete="off"></div>
+        <div class="form-row">
+          <div class="form-group"><label>Voce</label>
+            <select id="voice-voice">
+              <option value="openai:nova">Nova (femminile)</option>
+              <option value="openai:shimmer">Shimmer (femminile)</option>
+              <option value="openai:alloy">Alloy (neutra)</option>
+              <option value="openai:onyx">Onyx (maschile)</option>
+              <option value="openai:echo">Echo (maschile)</option>
+            </select></div>
+          <div class="form-group"><label>Modello</label>
+            <select id="voice-model">
+              <option value="gpt-4.1-mini">GPT-4.1 mini (consigliato)</option>
+              <option value="gpt-4.1">GPT-4.1 (più preciso, più costoso)</option>
+              <option value="gpt-4o-mini">GPT-4o mini</option>
+            </select></div>
+        </div>
+        <div class="form-group"><label>Primo messaggio</label><textarea id="voice-first" rows="2" placeholder="Lascia vuoto per: «Buongiorno, sono l'assistente AI di [locale]. Come posso aiutarla?»"></textarea>
+          <small style="color:var(--text-muted)">La dichiarazione "assistente AI" viene aggiunta in automatico se manca (AI Act UE, art. 50).</small></div>
+        <div class="form-group"><label>Numero per il trasferimento a una persona</label><input id="voice-transfer" type="text" placeholder="+390212345678"></div>
+        <details>
+          <summary style="cursor:pointer;color:var(--text-muted);font-size:13px">Prompt personalizzato (avanzato)</summary>
+          <textarea id="voice-prompt" rows="8" style="margin-top:10px" placeholder="Lascia vuoto per usare il prompt standard, già pronto per prenotazioni, asporto, allergeni e segnalazioni."></textarea>
+        </details>
+        <div class="voice-actions" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <button class="btn btn-outline" onclick="saveVoice(false)">Salva</button>
+          <button class="btn btn-primary" onclick="saveVoice(true)"><i class="ph-bold ph-arrows-clockwise"></i> Salva e sincronizza con Vapi</button>
+          <span id="voice-sync-info" class="kitchen-meta"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><h3>Numero di telefono</h3></div>
+      <div class="card-body" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <button class="btn btn-outline" onclick="loadVoiceNumbers()">Carica i miei numeri Vapi</button>
+        <select id="voice-number" style="width:auto;min-width:240px"><option value="">—</option></select>
+        <button class="btn btn-primary" id="voice-assign-btn" onclick="assignVoiceNumber()" disabled>Collega all'assistente</button>
+      </div>
+    </div>
+  </section>
+
   <!-- ══ SEGNALAZIONI ══ -->
   <section id="view-segnalazioni" class="view">
     <div class="view-header">
@@ -392,6 +479,21 @@
 <!-- ─── MODALS ─── -->
 
 <!-- Reservation Modal -->
+<div id="modal-call" class="modal-backdrop" style="display:none">
+  <div class="modal" style="max-width:640px">
+    <div class="modal-header">
+      <h3 id="call-modal-title">Chiamata</h3>
+      <button class="modal-close" onclick="closeModal('modal-call')"><i class="ph-bold ph-x"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="kitchen-meta" id="call-modal-meta"></div>
+      <audio id="call-modal-audio" controls style="display:none;width:100%"></audio>
+      <div class="modal-section"><div class="modal-section-title"><i class="ph-bold ph-note"></i> Riepilogo</div><div id="call-modal-summary" style="font-size:14px;line-height:1.5"></div></div>
+      <div class="modal-section"><div class="modal-section-title"><i class="ph-bold ph-chat-text"></i> Trascrizione</div><pre id="call-modal-transcript" class="call-transcript"></pre></div>
+    </div>
+  </div>
+</div>
+
 <div id="modal-reservation" class="modal-backdrop" style="display:none">
   <div class="modal">
     <div class="modal-header">
@@ -699,6 +801,7 @@
 <!-- Toast container -->
 <div id="toast-container"></div>
 
+<script src="voice.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

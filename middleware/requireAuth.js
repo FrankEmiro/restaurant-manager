@@ -2,6 +2,7 @@ function requireAuth(req, res, next) {
   // Sempre pubblici: tool VAPI (protetti dal segreto condiviso in server.js), auth, pagina di login
   if (
     req.path.startsWith('/vapi/') ||
+    req.path.startsWith('/webhook/vapi') ||
     req.path.startsWith('/api/auth/') ||
     req.path === '/login' ||
     req.path === '/login.html'

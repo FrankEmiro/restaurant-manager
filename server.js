@@ -20,7 +20,9 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(express.json({ limit: '1mb' }));
+// I report di fine chiamata (trascrizione + messaggi) possono superare 1 MB
+app.use('/webhook', express.json({ limit: '10mb' }));
+app.use((req, res, next) => req.path.startsWith('/webhook') ? next() : express.json({ limit: '1mb' })(req, res, next));
 
 // 1. Session middleware
 app.use(session({
@@ -82,9 +84,11 @@ app.use('/api/dashboard',    require('./routes/dashboard'));
 app.use('/api/allergens',    require('./routes/allergens'));
 app.use('/api/complaints',   require('./routes/complaints'));
 app.use('/api/security',     require('./routes/security'));
+app.use('/api/voice',        require('./routes/voice'));
 
 // 7. VAPI routes (fuori dalla sessione, protette dal segreto condiviso)
 app.use('/vapi', verifyVapiSecret, require('./routes/vapi'));
+app.use('/webhook/vapi', verifyVapiSecret, require('./routes/webhook'));
 
 // 8. SPA fallback
 app.get('*', (req, res) => {

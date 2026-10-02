@@ -147,6 +147,8 @@ function loadView(view) {
     case 'allergeni': loadAllergens(); break;
     case 'agenda':        loadAgenda();      break;
     case 'segnalazioni':  loadComplaints();  break;
+    case 'chiamate':      loadCalls();       break;
+    case 'voce':          loadVoice();       break;
   }
 }
 
