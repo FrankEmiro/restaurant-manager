@@ -3,41 +3,41 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>VAPI Docs — Ristorante Manager</title>
+  <title>VAPI Docs — Rebel Ristoranti</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: system-ui, sans-serif; background: #0f1117; color: #e2e8f0; display: flex; min-height: 100vh; }
 
-    aside { width: 250px; background: #1a1d2e; border-right: 1px solid #2e3250; padding: 24px 0; position: fixed; top: 0; bottom: 0; overflow-y: auto; }
-    .aside-logo { padding: 0 20px 20px; border-bottom: 1px solid #2e3250; margin-bottom: 16px; }
+    aside { width: 250px; background: #1a1d27; border-right: 1px solid #2a2d3e; padding: 24px 0; position: fixed; top: 0; bottom: 0; overflow-y: auto; }
+    .aside-logo { padding: 0 20px 20px; border-bottom: 1px solid #2a2d3e; margin-bottom: 16px; }
     .aside-logo h1 { font-size: 15px; color: #e2e8f0; }
     .aside-logo p { font-size: 11px; color: #64748b; margin-top: 2px; }
-    .toc-section { padding: 6px 20px; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #4f6ef7; font-weight: 700; margin-top: 12px; }
+    .toc-section { padding: 6px 20px; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #6366f1; font-weight: 700; margin-top: 12px; }
     aside a { display: block; padding: 6px 20px; font-size: 13px; color: #94a3b8; text-decoration: none; }
     aside a:hover { color: #e2e8f0; background: rgba(255,255,255,0.04); }
 
     main { margin-left: 250px; padding: 40px 48px; max-width: 920px; width: 100%; }
     h1 { font-size: 28px; margin-bottom: 8px; }
-    h2 { font-size: 20px; margin: 44px 0 16px; color: #e2e8f0; padding-top: 16px; border-top: 1px solid #2e3250; }
+    h2 { font-size: 20px; margin: 44px 0 16px; color: #e2e8f0; padding-top: 16px; border-top: 1px solid #2a2d3e; }
     h3 { font-size: 15px; color: #94a3b8; margin: 24px 0 10px; }
     p { font-size: 14px; color: #94a3b8; line-height: 1.6; margin-bottom: 12px; }
     .subtitle { font-size: 15px; color: #64748b; margin-bottom: 32px; }
 
-    .endpoint { display: inline-flex; align-items: center; gap: 8px; background: #1e2235; border: 1px solid #2e3250; border-radius: 8px; padding: 8px 14px; margin-bottom: 6px; font-size: 13px; font-family: monospace; }
-    .method { background: #7c3aed; color: white; border-radius: 4px; padding: 2px 7px; font-size: 11px; font-weight: 700; }
+    .endpoint { display: inline-flex; align-items: center; gap: 8px; background: #222535; border: 1px solid #2a2d3e; border-radius: 8px; padding: 8px 14px; margin-bottom: 6px; font-size: 13px; font-family: monospace; }
+    .method { background: #6366f1; color: white; border-radius: 4px; padding: 2px 7px; font-size: 11px; font-weight: 700; }
     .badge-new { background: #065f46; color: #6ee7b7; border-radius: 4px; padding: 2px 7px; font-size: 10px; font-weight: 700; font-family: system-ui; }
 
     .code-wrap { position: relative; margin: 12px 0 24px; }
-    pre { background: #1e2235; border: 1px solid #2e3250; border-radius: 10px; padding: 20px; font-size: 12.5px; line-height: 1.6; overflow-x: auto; color: #e2e8f0; white-space: pre-wrap; word-break: break-word; }
+    pre { background: #222535; border: 1px solid #2a2d3e; border-radius: 10px; padding: 20px; font-size: 12.5px; line-height: 1.6; overflow-x: auto; color: #e2e8f0; white-space: pre-wrap; word-break: break-word; }
     .copy-btn { position: absolute; top: 10px; right: 10px; border: none; border-radius: 6px; padding: 5px 12px; font-size: 12px; cursor: pointer; font-weight: 600; }
-    .copy-btn.blue   { background: #4f6ef7; color: #fff; }
-    .copy-btn.purple { background: #7c3aed; color: #fff; }
+    .copy-btn.blue   { background: #6366f1; color: #fff; }
+    .copy-btn.purple { background: #6366f1; color: #fff; }
 
     .alert { border-radius: 10px; padding: 16px 20px; font-size: 13px; line-height: 1.7; margin: 20px 0; }
     .alert-info    { background: rgba(79,110,247,0.12); border: 1px solid rgba(79,110,247,0.3); color: #93c5fd; }
     .alert-success { background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.3); color: #6ee7b7; }
 
-    .tool-card { background: #1a1d2e; border: 1px solid #2e3250; border-radius: 10px; padding: 16px 20px; margin-bottom: 12px; }
+    .tool-card { background: #1a1d27; border: 1px solid #2a2d3e; border-radius: 10px; padding: 16px 20px; margin-bottom: 12px; }
     .tool-name { font-size: 14px; font-weight: 700; font-family: monospace; color: #a78bfa; }
     .tool-desc { font-size: 13px; color: #94a3b8; margin-top: 4px; }
     .tool-card.new-tool { border-color: #065f46; }
@@ -50,7 +50,7 @@
 
 <aside>
   <div class="aside-logo">
-    <h1>🍽️ Ristorante Manager</h1>
+    <h1>Rebel Ristoranti</h1>
     <p>VAPI Documentation</p>
   </div>
   <div class="toc-section">Panoramica</div>
@@ -79,7 +79,7 @@
 
 <main>
   <h1>VAPI Integration Docs</h1>
-  <p class="subtitle">Configurazione dell'agente vocale per il Ristorante Manager</p>
+  <p class="subtitle">Configurazione dell'agente vocale per il Rebel Ristoranti</p>
 
   <!-- OVERVIEW -->
   <h2 id="overview">Come funziona</h2>

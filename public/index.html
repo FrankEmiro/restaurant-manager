@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Restaurant Manager</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <title>Rebel Ristoranti</title>
+  <script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("theme")||"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -12,49 +13,50 @@
 <!-- ─── SIDEBAR ─── -->
 <aside id="sidebar">
   <div class="logo">
-    <div class="logo-icon"><i class="bi bi-cup-hot-fill"></i></div>
+    <div class="logo-icon"><i class="ph-bold ph-fork-knife"></i></div>
     <div>
-      <h1>Ristorante</h1>
-      <span>Manager</span>
+      <h1>Rebel Ristoranti</h1>
+      <span>Gestione sala e asporto</span>
     </div>
   </div>
   <nav>
     <a data-view="dashboard" class="active">
-      <i class="bi bi-speedometer2 icon"></i>
+      <i class="ph-bold ph-squares-four icon"></i>
       <span>Dashboard</span>
     </a>
     <a data-view="cucina">
-      <i class="bi bi-fire icon"></i>
+      <i class="ph-bold ph-fire icon"></i>
       <span>Cucina</span>
     </a>
     <a data-view="mappa">
-      <i class="bi bi-map icon"></i>
+      <i class="ph-bold ph-map-trifold icon"></i>
       <span>Mappa Tavoli</span>
     </a>
     <a data-view="editor">
-      <i class="bi bi-grid-3x3-gap icon"></i>
+      <i class="ph-bold ph-grid-four icon"></i>
       <span>Editor Tavoli</span>
     </a>
     <a data-view="menu">
-      <i class="bi bi-journal-richtext icon"></i>
+      <i class="ph-bold ph-book-open icon"></i>
       <span>Menu</span>
     </a>
     <a data-view="agenda">
-      <i class="bi bi-calendar3 icon"></i>
+      <i class="ph-bold ph-calendar icon"></i>
       <span>Agenda</span>
     </a>
     <a data-view="allergeni">
-      <i class="bi bi-shield-exclamation icon"></i>
+      <i class="ph-bold ph-shield-warning icon"></i>
       <span>Allergeni</span>
     </a>
     <a data-view="segnalazioni">
-      <i class="bi bi-exclamation-circle icon"></i>
+      <i class="ph-bold ph-warning-circle icon"></i>
       <span>Segnalazioni</span>
     </a>
   </nav>
   <div class="sidebar-footer">
-    <button class="btn btn-logout" onclick="logout()">
-      <i class="bi bi-box-arrow-right"></i>
+    <button class="btn-theme" id="theme-btn" onclick="toggleTheme()"></button>
+    <button class="btn-logout" onclick="logout()">
+      <i class="ph-bold ph-sign-out"></i>
       <span>Esci</span>
     </button>
   </div>
@@ -69,43 +71,43 @@
       <h2>Dashboard</h2>
       <div style="display:flex;gap:8px">
         <button class="btn btn-outline" onclick="openAddReservationModal()">
-          <i class="bi bi-calendar-plus"></i> Prenotazione
+          <i class="ph-bold ph-calendar-plus"></i> Prenotazione
         </button>
         <button class="btn btn-primary" onclick="openAddOrderModal()">
-          <i class="bi bi-bag-plus"></i> Ordine asporto
+          <i class="ph-bold ph-shopping-bag"></i> Ordine asporto
         </button>
       </div>
     </div>
 
     <div class="stats-grid">
       <div class="stat-card accent">
-        <div class="stat-icon"><i class="bi bi-calendar-check"></i></div>
+        <div class="stat-icon"><i class="ph-bold ph-calendar-check"></i></div>
         <div class="label">Prenotazioni oggi</div>
         <div class="value" id="stat-reservations">—</div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon"><i class="bi bi-bag"></i></div>
+        <div class="stat-icon"><i class="ph-bold ph-shopping-bag"></i></div>
         <div class="label">Ordini asporto attivi</div>
         <div class="value" id="stat-orders">—</div>
       </div>
       <div class="stat-card success">
-        <div class="stat-icon"><i class="bi bi-table"></i></div>
+        <div class="stat-icon"><i class="ph-bold ph-table"></i></div>
         <div class="label">Tavoli liberi</div>
         <div class="value" id="stat-tables">—</div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon"><i class="bi bi-currency-euro"></i></div>
+        <div class="stat-icon"><i class="ph-bold ph-currency-eur"></i></div>
         <div class="label">Revenue giornaliero</div>
         <div class="value" id="stat-revenue">—</div>
       </div>
     </div>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;flex:1">
+    <div class="dash-grid">
       <div class="card">
         <div class="card-header">
           <h3>Prenotazioni di oggi</h3>
           <button class="btn btn-sm btn-outline" onclick="openAddReservationModal()">
-            <i class="bi bi-plus-lg"></i> Aggiungi
+            <i class="ph-bold ph-plus"></i> Aggiungi
           </button>
         </div>
         <div style="overflow-x:auto">
@@ -126,7 +128,7 @@
         <div class="card-header">
           <h3>Ordini asporto di oggi</h3>
           <button class="btn btn-sm btn-outline" onclick="openAddOrderModal()">
-            <i class="bi bi-plus-lg"></i> Aggiungi
+            <i class="ph-bold ph-plus"></i> Aggiungi
           </button>
         </div>
         <div style="overflow-x:auto">
@@ -146,20 +148,20 @@
   </section>
 
   <!-- ══ CUCINA ══ -->
-  <section id="view-cucina" class="view" style="padding:20px;background:#110d08;gap:16px">
-    <div class="view-header" style="border-bottom-color:rgba(255,255,255,0.08)">
-      <h2 style="color:white;font-family:'Cormorant Garamond',serif">
-        <i class="bi bi-fire" style="color:var(--orange);margin-right:8px"></i>Vista Cucina
+  <section id="view-cucina" class="view">
+    <div class="view-header">
+      <h2>
+        <i class="ph-bold ph-fire"></i>Vista Cucina
       </h2>
       <div style="display:flex;align-items:center;gap:12px">
         <span class="kitchen-meta" id="kitchen-last-update"></span>
-        <button class="btn btn-outline" style="color:rgba(255,255,255,0.6);border-color:rgba(255,255,255,0.15)" onclick="renderKitchen()">
-          <i class="bi bi-arrow-clockwise"></i> Aggiorna
+        <button class="btn btn-outline" onclick="renderKitchen()">
+          <i class="ph-bold ph-arrows-clockwise"></i> Aggiorna
         </button>
       </div>
     </div>
     <div class="kitchen-grid" id="kitchen-grid">
-      <div class="kitchen-empty"><i class="bi bi-cup-hot" style="font-size:40px;display:block;margin-bottom:12px;opacity:0.3"></i>Caricamento ordini...</div>
+      <div class="kitchen-empty"><i class="ph-bold ph-coffee" style="font-size:40px;display:block;margin-bottom:12px;opacity:0.3"></i>Caricamento ordini...</div>
     </div>
   </section>
 
@@ -168,7 +170,7 @@
     <div class="view-header">
       <h2>Mappa Tavoli</h2>
       <button class="btn btn-outline" onclick="loadMap()">
-        <i class="bi bi-arrow-clockwise"></i> Aggiorna
+        <i class="ph-bold ph-arrows-clockwise"></i> Aggiorna
       </button>
     </div>
     <div class="table-map-container card">
@@ -178,7 +180,7 @@
         <div class="legend-item"><div class="legend-dot occupied"></div> Occupato</div>
         <div class="legend-item"><div class="legend-dot reserved"></div> Prenotato</div>
         <span style="margin-left:auto;font-size:12px;color:var(--text-muted)">
-          <i class="bi bi-hand-index"></i> Clicca su un tavolo per cambiarne lo stato
+          <i class="ph-bold ph-hand-pointing"></i> Clicca su un tavolo per cambiarne lo stato
         </span>
       </div>
     </div>
@@ -189,12 +191,12 @@
     <div class="view-header">
       <h2>Editor Tavoli</h2>
       <button class="btn btn-primary" onclick="openAddTableModal()">
-        <i class="bi bi-plus-lg"></i> Aggiungi tavolo
+        <i class="ph-bold ph-plus"></i> Aggiungi tavolo
       </button>
     </div>
 
     <div class="editor-toolbar">
-      <i class="bi bi-info-circle" style="color:var(--beige)"></i>
+      <i class="ph-bold ph-info" style="color:var(--beige)"></i>
       <span style="font-size:13px;color:var(--text-muted)">Trascina i tavoli per riposizionarli. Clicca per selezionare e modificare.</span>
     </div>
 
@@ -222,16 +224,16 @@
             </select>
           </div>
           <button class="btn btn-primary" onclick="saveEditorTable()">
-            <i class="bi bi-check-lg"></i> Salva modifiche
+            <i class="ph-bold ph-check"></i> Salva modifiche
           </button>
           <button class="btn btn-danger" onclick="deleteEditorTable()">
-            <i class="bi bi-trash3"></i> Elimina tavolo
+            <i class="ph-bold ph-trash"></i> Elimina tavolo
           </button>
         </div>
       </div>
 
       <div class="card" id="editor-no-selection" style="display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--text-light);font-size:14px;gap:10px">
-        <i class="bi bi-cursor" style="font-size:32px;opacity:0.4"></i>
+        <i class="ph-bold ph-cursor" style="font-size:32px;opacity:0.4"></i>
         Seleziona un tavolo per modificarlo
       </div>
     </div>
@@ -242,7 +244,7 @@
     <div class="view-header">
       <h2>Menu</h2>
       <button class="btn btn-primary" onclick="openAddMenuModal()">
-        <i class="bi bi-plus-lg"></i> Aggiungi piatto
+        <i class="ph-bold ph-plus"></i> Aggiungi piatto
       </button>
     </div>
     <div class="menu-categories" id="menu-categories"></div>
@@ -256,11 +258,11 @@
     <div class="view-header">
       <h2>Allergeni</h2>
       <button class="btn btn-primary" onclick="openAddAllergenModal()">
-        <i class="bi bi-plus-lg"></i> Aggiungi allergene
+        <i class="ph-bold ph-plus"></i> Aggiungi allergene
       </button>
     </div>
     <p style="color:var(--text-muted);font-size:13px;margin-bottom:4px">
-      <i class="bi bi-info-circle"></i>
+      <i class="ph-bold ph-info"></i>
       Lista pre-popolata con i 14 allergeni obbligatori EU (Reg. 1169/2011).
     </p>
     <div class="allergen-grid" id="allergen-grid">
@@ -276,10 +278,10 @@
 
     <div class="agenda-tabs">
       <button class="agenda-tab active" id="tab-prenotazioni" onclick="switchAgendaTab('prenotazioni')">
-        <i class="bi bi-calendar-event"></i> Prenotazioni
+        <i class="ph-bold ph-calendar-dots"></i> Prenotazioni
       </button>
       <button class="agenda-tab" id="tab-ordini" onclick="switchAgendaTab('ordini')">
-        <i class="bi bi-bag"></i> Ordini asporto
+        <i class="ph-bold ph-shopping-bag"></i> Ordini asporto
       </button>
     </div>
 
@@ -295,7 +297,7 @@
           <input type="date" id="agenda-res-to">
         </div>
         <button class="btn btn-primary" onclick="loadAgendaReservations()">
-          <i class="bi bi-search"></i> Cerca
+          <i class="ph-bold ph-magnifying-glass"></i> Cerca
         </button>
       </div>
       <div class="card" style="padding:0;overflow-x:auto">
@@ -324,7 +326,7 @@
           <input type="date" id="agenda-ord-to">
         </div>
         <button class="btn btn-primary" onclick="loadAgendaOrders()">
-          <i class="bi bi-search"></i> Cerca
+          <i class="ph-bold ph-magnifying-glass"></i> Cerca
         </button>
       </div>
       <div class="card" style="padding:0;overflow-x:auto">
@@ -354,27 +356,27 @@
           <option value="risolta">Risolte</option>
         </select>
         <button class="btn btn-outline" onclick="loadComplaints()">
-          <i class="bi bi-arrow-clockwise"></i> Aggiorna
+          <i class="ph-bold ph-arrows-clockwise"></i> Aggiorna
         </button>
         <button class="btn btn-primary" onclick="openNewComplaintModal()">
-          <i class="bi bi-plus-lg"></i> Nuova segnalazione
+          <i class="ph-bold ph-plus"></i> Nuova segnalazione
         </button>
       </div>
     </div>
 
     <div class="stats-grid" style="grid-template-columns:repeat(3,1fr)">
       <div class="stat-card" style="border-left-color:var(--danger)">
-        <div class="stat-icon" style="color:var(--danger)"><i class="bi bi-exclamation-circle"></i></div>
+        <div class="stat-icon" style="color:var(--danger)"><i class="ph-bold ph-warning-circle"></i></div>
         <div class="label">Aperte</div>
         <div class="value" id="complaint-stat-aperte" style="color:var(--danger)">—</div>
       </div>
       <div class="stat-card" style="border-left-color:var(--warning)">
-        <div class="stat-icon" style="color:var(--warning)"><i class="bi bi-hourglass-split"></i></div>
+        <div class="stat-icon" style="color:var(--warning)"><i class="ph-bold ph-hourglass"></i></div>
         <div class="label">In gestione</div>
         <div class="value" id="complaint-stat-gestione" style="color:var(--warning)">—</div>
       </div>
       <div class="stat-card success">
-        <div class="stat-icon"><i class="bi bi-check-circle"></i></div>
+        <div class="stat-icon"><i class="ph-bold ph-check-circle"></i></div>
         <div class="label">Risolte</div>
         <div class="value" id="complaint-stat-risolte">—</div>
       </div>
@@ -394,7 +396,7 @@
   <div class="modal">
     <div class="modal-header">
       <h3 id="res-modal-title">Nuova prenotazione</h3>
-      <button class="modal-close" onclick="closeModal('modal-reservation')"><i class="bi bi-x-lg"></i></button>
+      <button class="modal-close" onclick="closeModal('modal-reservation')"><i class="ph-bold ph-x"></i></button>
     </div>
     <form id="res-form" onsubmit="event.preventDefault(); submitReservation()">
       <div class="modal-body">
@@ -438,7 +440,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-outline" onclick="closeModal('modal-reservation')">Annulla</button>
-        <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Salva prenotazione</button>
+        <button type="submit" class="btn btn-primary"><i class="ph-bold ph-check"></i> Salva prenotazione</button>
       </div>
     </form>
   </div>
@@ -449,7 +451,7 @@
   <div class="modal">
     <div class="modal-header">
       <h3>Nuovo tavolo</h3>
-      <button class="modal-close" onclick="closeModal('modal-add-table')"><i class="bi bi-x-lg"></i></button>
+      <button class="modal-close" onclick="closeModal('modal-add-table')"><i class="ph-bold ph-x"></i></button>
     </div>
     <form id="add-table-form" onsubmit="event.preventDefault(); submitAddTable()">
       <div class="modal-body">
@@ -471,7 +473,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-outline" onclick="closeModal('modal-add-table')">Annulla</button>
-        <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Aggiungi tavolo</button>
+        <button type="submit" class="btn btn-primary"><i class="ph-bold ph-check"></i> Aggiungi tavolo</button>
       </div>
     </form>
   </div>
@@ -482,7 +484,7 @@
   <div class="modal">
     <div class="modal-header">
       <h3 id="menu-modal-title">Nuovo piatto</h3>
-      <button class="modal-close" onclick="closeModal('modal-menu-item')"><i class="bi bi-x-lg"></i></button>
+      <button class="modal-close" onclick="closeModal('modal-menu-item')"><i class="ph-bold ph-x"></i></button>
     </div>
     <form id="menu-item-form" onsubmit="event.preventDefault(); submitMenuItem()">
       <div class="modal-body">
@@ -514,17 +516,17 @@
         <div style="display:flex;gap:20px;margin-top:4px">
           <label class="check-label">
             <input type="checkbox" id="mi-vegetarian">
-            <i class="bi bi-leaf" style="color:#166534"></i> Vegetariano
+            <i class="ph-bold ph-leaf" style="color:var(--success)"></i> Vegetariano
           </label>
           <label class="check-label">
             <input type="checkbox" id="mi-vegan">
-            <i class="bi bi-flower1" style="color:#065f46"></i> Vegano
+            <i class="ph-bold ph-flower" style="color:var(--success)"></i> Vegano
           </label>
         </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-outline" onclick="closeModal('modal-menu-item')">Annulla</button>
-        <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Salva piatto</button>
+        <button type="submit" class="btn btn-primary"><i class="ph-bold ph-check"></i> Salva piatto</button>
       </div>
     </form>
   </div>
@@ -535,7 +537,7 @@
   <div class="modal" style="max-width:580px">
     <div class="modal-header">
       <h3>Nuovo ordine asporto</h3>
-      <button class="modal-close" onclick="closeModal('modal-order')"><i class="bi bi-x-lg"></i></button>
+      <button class="modal-close" onclick="closeModal('modal-order')"><i class="ph-bold ph-x"></i></button>
     </div>
     <form id="order-form" onsubmit="event.preventDefault(); submitOrder()">
       <div class="modal-body">
@@ -567,14 +569,14 @@
         <!-- Allergeni -->
         <div class="modal-section">
           <div class="modal-section-title">
-            <i class="bi bi-shield-exclamation"></i> Allergie del cliente
+            <i class="ph-bold ph-shield-warning"></i> Allergie del cliente
           </div>
           <div id="ord-allergen-list" style="display:grid;grid-template-columns:1fr 1fr;gap:6px"></div>
         </div>
 
         <!-- Item picker -->
         <div class="modal-section">
-          <div class="modal-section-title"><i class="bi bi-basket3"></i> Piatti</div>
+          <div class="modal-section-title"><i class="ph-bold ph-basket"></i> Piatti</div>
           <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:12px">
             <div class="form-group" style="flex:1;margin:0">
               <select id="ord-item-select" style="width:100%">
@@ -585,19 +587,19 @@
               <input type="number" id="ord-item-qty" value="1" min="1" max="99" style="text-align:center">
             </div>
             <button type="button" class="btn btn-outline" onclick="addOrderItem()">
-              <i class="bi bi-plus-lg"></i> Aggiungi
+              <i class="ph-bold ph-plus"></i> Aggiungi
             </button>
           </div>
           <div id="ord-items-list" style="display:flex;flex-direction:column;gap:6px;min-height:40px"></div>
           <div style="display:flex;justify-content:flex-end;margin-top:12px;padding-top:10px;border-top:1px solid var(--border)">
             <span style="font-size:14px;color:var(--text-muted);margin-right:8px;line-height:1.8">Totale:</span>
-            <span id="ord-total" style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--orange)">€0.00</span>
+            <span id="ord-total" style="font-size:22px;font-weight:700;color:var(--orange)">€0.00</span>
           </div>
         </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-outline" onclick="closeModal('modal-order')">Annulla</button>
-        <button type="submit" class="btn btn-primary"><i class="bi bi-bag-check"></i> Crea ordine</button>
+        <button type="submit" class="btn btn-primary"><i class="ph-bold ph-shopping-bag"></i> Crea ordine</button>
       </div>
     </form>
   </div>
@@ -608,7 +610,7 @@
   <div class="modal">
     <div class="modal-header">
       <h3 id="allergen-modal-title">Nuovo allergene</h3>
-      <button class="modal-close" onclick="closeModal('modal-allergen')"><i class="bi bi-x-lg"></i></button>
+      <button class="modal-close" onclick="closeModal('modal-allergen')"><i class="ph-bold ph-x"></i></button>
     </div>
     <form id="allergen-form" onsubmit="event.preventDefault(); submitAllergen()">
       <div class="modal-body">
@@ -624,7 +626,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-outline" onclick="closeModal('modal-allergen')">Annulla</button>
-        <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Salva</button>
+        <button type="submit" class="btn btn-primary"><i class="ph-bold ph-check"></i> Salva</button>
       </div>
     </form>
   </div>
@@ -635,13 +637,13 @@
   <div class="modal">
     <div class="modal-header">
       <h3 id="complaint-modal-title">Segnalazione</h3>
-      <button class="modal-close" onclick="closeModal('modal-complaint')"><i class="bi bi-x-lg"></i></button>
+      <button class="modal-close" onclick="closeModal('modal-complaint')"><i class="ph-bold ph-x"></i></button>
     </div>
     <div class="modal-body" id="complaint-modal-body"></div>
     <div class="modal-footer">
       <button type="button" class="btn btn-outline" onclick="closeModal('modal-complaint')">Chiudi</button>
       <button type="button" class="btn btn-primary" onclick="saveComplaintNotes()">
-        <i class="bi bi-check-lg"></i> Salva
+        <i class="ph-bold ph-check"></i> Salva
       </button>
     </div>
   </div>
@@ -652,7 +654,7 @@
   <div class="modal">
     <div class="modal-header">
       <h3>Nuova segnalazione</h3>
-      <button class="modal-close" onclick="closeModal('modal-new-complaint')"><i class="bi bi-x-lg"></i></button>
+      <button class="modal-close" onclick="closeModal('modal-new-complaint')"><i class="ph-bold ph-x"></i></button>
     </div>
     <form id="complaint-form" onsubmit="event.preventDefault(); submitComplaint()">
       <div class="modal-body">
@@ -688,7 +690,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-outline" onclick="closeModal('modal-new-complaint')">Annulla</button>
-        <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Registra</button>
+        <button type="submit" class="btn btn-primary"><i class="ph-bold ph-check"></i> Registra</button>
       </div>
     </form>
   </div>

@@ -6,6 +6,21 @@ const API = '';  // same origin
 
 // ─── AUTH ────────────────────────────────────────
 
+// Tema chiaro/scuro (stesso comportamento di Rebel CRM)
+function toggleTheme() {
+  const next = (document.documentElement.getAttribute('data-theme') || 'dark') === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  try { localStorage.setItem('theme', next); } catch (e) {}
+  updateThemeButton();
+}
+function updateThemeButton() {
+  const dark = (document.documentElement.getAttribute('data-theme') || 'dark') === 'dark';
+  const btn = document.getElementById('theme-btn');
+  if (btn) btn.innerHTML = dark
+    ? '<i class="ph-bold ph-sun"></i><span>Tema chiaro</span>'
+    : '<i class="ph-bold ph-moon"></i><span>Tema scuro</span>';
+}
+
 async function logout() {
   await fetch('/api/auth/logout', { method: 'POST' });
   window.location.href = '/login';
@@ -170,8 +185,8 @@ async function loadDashboard() {
           <td>${statusBadge(r.status)}</td>
           <td>
             <div class="row-actions">
-              <button class="btn-icon" title="Modifica" onclick="editReservation(${r.id})"><i class="bi bi-pencil"></i></button>
-              <button class="btn-icon danger" title="Cancella" onclick="cancelReservation(${r.id})"><i class="bi bi-x-lg"></i></button>
+              <button class="btn-icon" title="Modifica" onclick="editReservation(${r.id})"><i class="ph-bold ph-pencil-simple"></i></button>
+              <button class="btn-icon danger" title="Cancella" onclick="cancelReservation(${r.id})"><i class="ph-bold ph-x"></i></button>
             </div>
           </td>
         </tr>
@@ -184,11 +199,11 @@ async function loadDashboard() {
       ordersBody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text-muted)">Nessun ordine oggi</td></tr>';
     } else {
       const nextStatus = { pending: 'preparing', preparing: 'ready', ready: 'picked_up' };
-      const nextIcon  = { pending: 'bi-play-fill', preparing: 'bi-check-lg', ready: 'bi-archive' };
+      const nextIcon  = { pending: 'ph-play', preparing: 'ph-check', ready: 'ph-archive' };
       const nextLabel = { pending: 'Prepara', preparing: 'Pronto', ready: 'Archivia' };
       ordersBody.innerHTML = orders.map(o => {
         const allergenBadge = (o.allergens && o.allergens.length > 0)
-          ? `<br><span style="color:#dc2626;font-size:11px;font-weight:600"><i class="bi bi-exclamation-triangle-fill"></i> ${o.allergens.map(a => esc(a.allergen_name)).join(', ')}</span>`
+          ? `<br><span style="color:var(--error);font-size:11px;font-weight:600"><i class="ph-bold ph-warning"></i> ${o.allergens.map(a => esc(a.allergen_name)).join(', ')}</span>`
           : '';
         return `
         <tr>
@@ -199,8 +214,8 @@ async function loadDashboard() {
           <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(o.notes) || ''}">${esc(o.notes) || '—'}</td>
           <td>
             <div class="row-actions">
-              ${nextStatus[o.status] ? `<button class="btn-icon" title="${nextLabel[o.status]}" onclick="advanceOrderStatus(${o.id},'${nextStatus[o.status]}')"><i class="bi ${nextIcon[o.status]}"></i></button>` : ''}
-              <button class="btn-icon danger" title="Elimina" onclick="deleteOrder(${o.id})"><i class="bi bi-trash3"></i></button>
+              ${nextStatus[o.status] ? `<button class="btn-icon" title="${nextLabel[o.status]}" onclick="advanceOrderStatus(${o.id},'${nextStatus[o.status]}')"><i class="ph-bold ${nextIcon[o.status]}"></i></button>` : ''}
+              <button class="btn-icon danger" title="Elimina" onclick="deleteOrder(${o.id})"><i class="ph-bold ph-trash"></i></button>
             </div>
           </td>
         </tr>
@@ -273,7 +288,7 @@ async function renderKitchen() {
     const grid = document.getElementById('kitchen-grid');
 
     if (active.length === 0) {
-      grid.innerHTML = '<div class="kitchen-empty"><i class="bi bi-cup-hot" style="font-size:40px;display:block;margin-bottom:12px;opacity:0.3"></i>Nessun ordine attivo</div>';
+      grid.innerHTML = '<div class="kitchen-empty"><i class="ph-bold ph-coffee" style="font-size:40px;display:block;margin-bottom:12px;opacity:0.3"></i>Nessun ordine attivo</div>';
       return;
     }
 
@@ -284,20 +299,20 @@ async function renderKitchen() {
 
       let actions = '';
       if (o.status === 'pending') {
-        actions = `<button class="btn btn-warning" onclick="updateOrderStatus(${o.id},'preparing')"><i class="bi bi-play-fill"></i> In preparazione</button>`;
+        actions = `<button class="btn btn-warning" onclick="updateOrderStatus(${o.id},'preparing')"><i class="ph-bold ph-play"></i> In preparazione</button>`;
       } else if (o.status === 'preparing') {
-        actions = `<button class="btn btn-success" onclick="updateOrderStatus(${o.id},'ready')"><i class="bi bi-check-lg"></i> Pronto</button>`;
+        actions = `<button class="btn btn-success" onclick="updateOrderStatus(${o.id},'ready')"><i class="ph-bold ph-check"></i> Pronto</button>`;
       } else if (o.status === 'ready') {
-        actions = `<button class="btn btn-outline" style="color:white;border-color:rgba(255,255,255,0.2)" onclick="updateOrderStatus(${o.id},'picked_up')"><i class="bi bi-archive"></i> Archivia</button>`;
+        actions = `<button class="btn btn-outline" onclick="updateOrderStatus(${o.id},'picked_up')"><i class="ph-bold ph-archive"></i> Archivia</button>`;
       }
 
       const allergenBanner = (o.allergens && o.allergens.length > 0)
-        ? `<div class="kc-allergens"><i class="bi bi-exclamation-triangle-fill"></i> ALLERGIE: ${o.allergens.map(a => esc(a.allergen_name)).join(', ')}</div>`
+        ? `<div class="kc-allergens"><i class="ph-bold ph-warning"></i> ALLERGIE: ${o.allergens.map(a => esc(a.allergen_name)).join(', ')}</div>`
         : '';
 
-      const statusLabel = o.status === 'pending' ? '<i class="bi bi-hourglass-split"></i> In attesa'
-        : o.status === 'preparing' ? '<i class="bi bi-fire"></i> In preparazione'
-        : '<i class="bi bi-check-circle-fill"></i> Pronto';
+      const statusLabel = o.status === 'pending' ? '<i class="ph-bold ph-hourglass"></i> In attesa'
+        : o.status === 'preparing' ? '<i class="ph-bold ph-fire"></i> In preparazione'
+        : '<i class="ph-bold ph-check-circle"></i> Pronto';
 
       return `
         <div class="kitchen-card ${o.status}">
@@ -305,7 +320,7 @@ async function renderKitchen() {
           <div class="kc-customer">${esc(o.customer_name)}</div>
           <div class="kc-time">Ritiro: ${o.pickup_time} ${countdownLabel(o.pickup_date, o.pickup_time)}</div>
           ${allergenBanner}
-          ${o.notes ? `<div class="kc-notes"><i class="bi bi-sticky"></i> ${esc(o.notes)}</div>` : ''}
+          ${o.notes ? `<div class="kc-notes"><i class="ph-bold ph-note"></i> ${esc(o.notes)}</div>` : ''}
           <div class="kc-items">${items}</div>
           <div class="kc-actions">${actions}</div>
         </div>`;
@@ -378,10 +393,10 @@ function showTablePopup(e, tableId) {
   const status = effectiveStatus(table);
 
   const resBlock = res ? `
-    <div style="background:#fef3c7;border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:13px">
+    <div style="background:rgba(245,158,11,.1);border-left:3px solid var(--warning);border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:13px">
       <strong>${esc(res.customer_name)}</strong> · ${res.guests} persone<br>
       🕐 ${esc(res.time)}${res.customer_phone ? ' · ' + esc(res.customer_phone) : ''}
-      ${res.notes ? `<br><span style="color:#92400e">📝 ${esc(res.notes)}</span>` : ''}
+      ${res.notes ? `<br><span style="color:var(--warning)">📝 ${esc(res.notes)}</span>` : ''}
     </div>` : '';
 
   const statusOptions = ['free', 'occupied', 'reserved'].map(s =>
@@ -601,8 +616,8 @@ function renderMenu() {
 
   grid.innerHTML = filtered.map(item => {
     const badges = [
-      item.vegan       ? '<span class="diet-badge vegan"><i class="bi bi-flower1"></i> Vegano</span>'        : '',
-      item.vegetarian  ? '<span class="diet-badge vegetarian"><i class="bi bi-leaf"></i> Vegetariano</span>' : '',
+      item.vegan       ? '<span class="diet-badge vegan"><i class="ph-bold ph-flower"></i> Vegano</span>'        : '',
+      item.vegetarian  ? '<span class="diet-badge vegetarian"><i class="ph-bold ph-leaf"></i> Vegetariano</span>' : '',
     ].filter(Boolean).join('');
     return `
     <div class="menu-item-card ${item.available ? '' : 'unavailable'}">
@@ -620,8 +635,8 @@ function renderMenu() {
           <span class="toggle-slider"></span>
           <span class="toggle-label">${item.available ? 'Disponibile' : 'Non disp.'}</span>
         </label>
-        <button class="btn-icon" title="Modifica" onclick="editMenuItem(${item.id})"><i class="bi bi-pencil"></i></button>
-        <button class="btn-icon danger" title="Elimina" onclick="deleteMenuItem(${item.id})"><i class="bi bi-trash3"></i></button>
+        <button class="btn-icon" title="Modifica" onclick="editMenuItem(${item.id})"><i class="ph-bold ph-pencil-simple"></i></button>
+        <button class="btn-icon danger" title="Elimina" onclick="deleteMenuItem(${item.id})"><i class="ph-bold ph-trash"></i></button>
       </div>
     </div>
   `}).join('');
@@ -928,8 +943,8 @@ function renderAllergens() {
         ${a.description ? `<div class="allergen-desc">${esc(a.description)}</div>` : ''}
       </div>
       <div class="allergen-actions">
-        <button class="btn-icon" title="Modifica" onclick="editAllergen(${a.id})"><i class="bi bi-pencil"></i></button>
-        <button class="btn-icon danger" title="Elimina" onclick="deleteAllergen(${a.id})"><i class="bi bi-trash3"></i></button>
+        <button class="btn-icon" title="Modifica" onclick="editAllergen(${a.id})"><i class="ph-bold ph-pencil-simple"></i></button>
+        <button class="btn-icon danger" title="Elimina" onclick="deleteAllergen(${a.id})"><i class="ph-bold ph-trash"></i></button>
       </div>
     </div>
   `).join('');
@@ -1044,8 +1059,8 @@ async function loadAgendaReservations() {
         <td>${statusBadge(r.status)}</td>
         <td>
           <div class="row-actions">
-            <button class="btn-icon" title="Modifica" onclick="editReservation(${r.id})"><i class="bi bi-pencil"></i></button>
-            ${r.status !== 'cancelled' ? `<button class="btn-icon danger" title="Cancella" onclick="cancelAgendaReservation(${r.id})"><i class="bi bi-x-lg"></i></button>` : ''}
+            <button class="btn-icon" title="Modifica" onclick="editReservation(${r.id})"><i class="ph-bold ph-pencil-simple"></i></button>
+            ${r.status !== 'cancelled' ? `<button class="btn-icon danger" title="Cancella" onclick="cancelAgendaReservation(${r.id})"><i class="ph-bold ph-x"></i></button>` : ''}
           </div>
         </td>
       </tr>
@@ -1122,7 +1137,7 @@ async function loadComplaints() {
 
     const list = document.getElementById('complaint-list');
     if (rows.length === 0) {
-      list.innerHTML = '<div style="text-align:center;padding:48px;color:var(--text-muted)"><i class="bi bi-check-circle" style="font-size:40px;opacity:0.3;display:block;margin-bottom:12px"></i>Nessuna segnalazione</div>';
+      list.innerHTML = '<div style="text-align:center;padding:48px;color:var(--text-muted)"><i class="ph-bold ph-check-circle" style="font-size:40px;opacity:0.3;display:block;margin-bottom:12px"></i>Nessuna segnalazione</div>';
       return;
     }
     list.innerHTML = rows.map(c => {
@@ -1135,9 +1150,9 @@ async function loadComplaints() {
           <div>
             <div class="complaint-type">${esc(COMPLAINT_TYPE_LABEL[c.type] || c.type)}</div>
             <div class="complaint-customer">
-              <i class="bi bi-person"></i> <strong>${esc(c.customer_name)}</strong>
-              &nbsp;·&nbsp;<i class="bi bi-telephone"></i> ${esc(c.customer_phone)}
-              ${c.order_id ? `&nbsp;·&nbsp;<i class="bi bi-bag"></i> Ordine #${c.order_id}` : ''}
+              <i class="ph-bold ph-user"></i> <strong>${esc(c.customer_name)}</strong>
+              &nbsp;·&nbsp;<i class="ph-bold ph-phone"></i> ${esc(c.customer_phone)}
+              ${c.order_id ? `&nbsp;·&nbsp;<i class="ph-bold ph-shopping-bag"></i> Ordine #${c.order_id}` : ''}
             </div>
           </div>
           <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
@@ -1146,14 +1161,14 @@ async function loadComplaints() {
           </div>
         </div>
         <div class="complaint-desc">${esc(c.description)}</div>
-        ${c.staff_notes ? `<div class="complaint-staff-note"><i class="bi bi-sticky"></i> ${esc(c.staff_notes)}</div>` : ''}
+        ${c.staff_notes ? `<div class="complaint-staff-note"><i class="ph-bold ph-note"></i> ${esc(c.staff_notes)}</div>` : ''}
         <div class="complaint-actions">
           <button class="btn-icon" title="Dettaglio / Gestisci" onclick="openComplaintModal(${c.id})">
-            <i class="bi bi-pencil"></i>
+            <i class="ph-bold ph-pencil-simple"></i>
           </button>
-          ${c.status !== 'in_gestione' && c.status !== 'risolta' ? `<button class="btn btn-sm btn-warning" onclick="setComplaintStatus(${c.id},'in_gestione')"><i class="bi bi-hourglass-split"></i> Prendi in carico</button>` : ''}
-          ${c.status !== 'risolta' ? `<button class="btn btn-sm btn-success" onclick="setComplaintStatus(${c.id},'risolta')"><i class="bi bi-check-lg"></i> Risolvi</button>` : ''}
-          <button class="btn-icon danger" title="Elimina" onclick="deleteComplaint(${c.id})"><i class="bi bi-trash3"></i></button>
+          ${c.status !== 'in_gestione' && c.status !== 'risolta' ? `<button class="btn btn-sm btn-warning" onclick="setComplaintStatus(${c.id},'in_gestione')"><i class="ph-bold ph-hourglass"></i> Prendi in carico</button>` : ''}
+          ${c.status !== 'risolta' ? `<button class="btn btn-sm btn-success" onclick="setComplaintStatus(${c.id},'risolta')"><i class="ph-bold ph-check"></i> Risolvi</button>` : ''}
+          <button class="btn-icon danger" title="Elimina" onclick="deleteComplaint(${c.id})"><i class="ph-bold ph-trash"></i></button>
         </div>
       </div>`;
     }).join('');
@@ -1262,6 +1277,7 @@ async function submitComplaint() {
 // ─── INIT ────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', () => {
+  updateThemeButton();
   // Nav
   document.querySelectorAll('[data-view]').forEach(a => {
     a.addEventListener('click', () => navigate(a.dataset.view));

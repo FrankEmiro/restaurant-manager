@@ -3,21 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Accesso — Ristorante Manager</title>
+  <title>Accesso — Rebel Ristoranti</title>
+  <script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("theme")||"dark")}catch(e){}</script>
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: system-ui, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
-    .box { background: #1a1d2e; border: 1px solid #2e3250; border-radius: 14px; padding: 44px 40px; width: 380px; }
+    .box { background: #1a1d27; border: 1px solid #2a2d3e; border-radius: 16px; padding: 44px 40px; width: 380px; }
     .logo { text-align: center; margin-bottom: 32px; }
-    .logo .icon { font-size: 42px; display: block; margin-bottom: 10px; }
+    .logo .icon { width: 52px; height: 52px; border-radius: 14px; background: #6366f1; color: #fff; font-size: 26px; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; }
+    [data-theme="light"] body { background: #f1f5f9; color: #1e293b; }
+    [data-theme="light"] .box { background: #fff; border-color: #e2e8f0; }
+    [data-theme="light"] .group input { background: #fff; border-color: #cbd5e1; color: #1e293b; }
     .logo h1 { font-size: 20px; }
     .logo p { font-size: 13px; color: #94a3b8; margin-top: 4px; }
     .group { margin-bottom: 18px; }
     .group label { display: block; font-size: 12px; color: #94a3b8; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .group input { width: 100%; background: #252840; border: 1px solid #2e3250; color: #e2e8f0; border-radius: 8px; padding: 11px 14px; font-size: 14px; outline: none; }
-    .group input:focus { border-color: #e8643a; }
-    .btn { width: 100%; background: #e8643a; color: #fff; border: none; border-radius: 8px; padding: 12px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 8px; transition: background 0.15s; }
-    .btn:hover:not(:disabled) { background: #d4532a; }
+    .group input { width: 100%; background: #222535; border: 1px solid #2a2d3e; color: #e2e8f0; border-radius: 8px; padding: 11px 14px; font-size: 14px; outline: none; }
+    .group input:focus { border-color: #6366f1; }
+    .btn { width: 100%; background: #6366f1; color: #fff; border: none; border-radius: 8px; padding: 12px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 8px; transition: background 0.15s; }
+    .btn:hover:not(:disabled) { background: #5254cc; }
     .btn:disabled { opacity: .5; cursor: default; }
     .error { background: rgba(239,68,68,.15); border: 1px solid rgba(239,68,68,.3); color: #fca5a5; border-radius: 8px; padding: 10px 14px; font-size: 13px; margin-bottom: 16px; display: none; }
     .error.show { display: block; }
@@ -26,8 +31,8 @@
 <body>
   <div class="box">
     <div class="logo">
-      <span class="icon">🍽️</span>
-      <h1>Ristorante Manager</h1>
+      <span class="icon"><i class="ph-bold ph-fork-knife"></i></span>
+      <h1>Rebel Ristoranti</h1>
       <p>Accedi per continuare</p>
     </div>
     <div class="error" id="err">Credenziali non valide. Riprova.</div>
@@ -57,7 +62,11 @@
           body: JSON.stringify({ username: document.getElementById('u').value, password: document.getElementById('p').value })
         });
         if (res.ok) { window.location.href = '/'; }
-        else { err.classList.add('show'); btn.disabled = false; btn.textContent = 'Accedi'; }
+        else {
+          const d = await res.json().catch(() => ({}));
+          err.textContent = d.error || 'Credenziali non valide. Riprova.';
+          err.classList.add('show'); btn.disabled = false; btn.textContent = 'Accedi';
+        }
       } catch {
         err.textContent = 'Errore di connessione.';
         err.classList.add('show');
