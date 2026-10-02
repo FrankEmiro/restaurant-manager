@@ -507,6 +507,12 @@
         <div class="form-group"><label>Primo messaggio</label><textarea id="voice-first" rows="2" placeholder="Lascia vuoto per: «Buongiorno, sono l'assistente AI di [locale]. Come posso aiutarla?»"></textarea>
           <small style="color:var(--text-muted)">La dichiarazione "assistente AI" viene aggiunta in automatico se manca (AI Act UE, art. 50).</small></div>
         <div class="form-group"><label>Numero per il trasferimento a una persona</label><input id="voice-transfer" type="text" placeholder="+390212345678"></div>
+        <div class="form-row">
+          <div class="form-group"><label>Registrazione audio delle chiamate</label>
+            <select id="voice-record"><option value="0">Spenta (consigliato)</option><option value="1">Attiva (l'assistente lo dichiara)</option></select></div>
+          <div class="form-group"><label>Conserva trascrizioni per (mesi)</label><input id="voice-retention" type="number" min="1" max="120" placeholder="12"></div>
+        </div>
+        <small style="color:var(--text-muted)">All'inizio della chiamata l'assistente dice che è un'AI e che la chiamata viene trascritta. Per impostazione predefinita l'audio non viene registrato. Dopo il salvataggio premi "Salva e sincronizza".</small>
         <details>
           <summary style="cursor:pointer;color:var(--text-muted);font-size:13px">Prompt personalizzato (avanzato)</summary>
           <textarea id="voice-prompt" rows="8" style="margin-top:10px" placeholder="Lascia vuoto per usare il prompt standard, già pronto per prenotazioni, asporto, allergeni e segnalazioni."></textarea>

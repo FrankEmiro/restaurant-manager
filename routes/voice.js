@@ -4,7 +4,7 @@ const cfg = require('../lib/config');
 const vapi = require('../lib/vapiClient');
 
 // Impostazioni modificabili dall'app. Le chiavi sensibili non vengono mai restituite al browser.
-const FIELDS = ['RESTAURANT_NAME', 'PUBLIC_URL', 'FIRST_MESSAGE', 'VOICE', 'MODEL', 'TRANSFER_PHONE', 'TIMEZONE', 'MAX_CALL_DURATION_SECONDS', 'SYSTEM_PROMPT'];
+const FIELDS = ['RECORD_CALLS', 'RETENTION_MONTHS', 'RESTAURANT_NAME', 'PUBLIC_URL', 'FIRST_MESSAGE', 'VOICE', 'MODEL', 'TRANSFER_PHONE', 'TIMEZONE', 'MAX_CALL_DURATION_SECONDS', 'SYSTEM_PROMPT'];
 
 function state() {
   const synced = db.prepare('SELECT COUNT(*) AS n, MAX(synced_at) AS last FROM vapi_tools').get();
@@ -29,6 +29,8 @@ router.post('/settings', (req, res) => {
   if (b.PUBLIC_URL !== undefined && b.PUBLIC_URL !== '' && !/^https?:\/\/[^\s/]+/i.test(b.PUBLIC_URL)) {
     return res.status(400).json({ error: 'URL pubblico non valido (deve iniziare con https://)' });
   }
+  if (b.RECORD_CALLS !== undefined && b.RECORD_CALLS !== '' && !['0', '1'].includes(String(b.RECORD_CALLS))) return res.status(400).json({ error: 'Registrazione non valida' });
+  if (b.RETENTION_MONTHS && !(parseInt(b.RETENTION_MONTHS, 10) >= 1 && parseInt(b.RETENTION_MONTHS, 10) <= 120)) return res.status(400).json({ error: 'Conservazione: tra 1 e 120 mesi' });
   if (b.TRANSFER_PHONE && !/^\+\d{8,15}$/.test(b.TRANSFER_PHONE)) {
     return res.status(400).json({ error: 'Numero di trasferimento non valido: usa il formato internazionale, es. +390212345678' });
   }

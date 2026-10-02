@@ -38,6 +38,8 @@ async function loadVoice() {
   set('voice-voice', st.VOICE || 'openai:nova');
   set('voice-model', st.MODEL || 'gpt-4.1-mini');
   set('voice-transfer', st.TRANSFER_PHONE);
+  set('voice-record', st.RECORD_CALLS || '0');
+  set('voice-retention', st.RETENTION_MONTHS || '12');
   set('voice-prompt', st.SYSTEM_PROMPT);
   set('voice-key', '');
   document.getElementById('voice-key').placeholder = st.apiKeySet ? '•••••••• salvata (lascia vuoto per mantenerla)' : 'Incolla la chiave API Vapi';
@@ -52,7 +54,8 @@ function voiceFormBody() {
   return {
     RESTAURANT_NAME: v('voice-name'), PUBLIC_URL: v('voice-url'), VAPI_API_KEY: v('voice-key'),
     FIRST_MESSAGE: v('voice-first'), VOICE: v('voice-voice'), MODEL: v('voice-model'),
-    TRANSFER_PHONE: v('voice-transfer'), SYSTEM_PROMPT: v('voice-prompt')
+    TRANSFER_PHONE: v('voice-transfer'), SYSTEM_PROMPT: v('voice-prompt'),
+    RECORD_CALLS: v('voice-record'), RETENTION_MONTHS: v('voice-retention')
   };
 }
 
