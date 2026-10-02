@@ -2,6 +2,10 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 const { vapiMiddleware } = require('../vapi/handler');
+const booking = require('../lib/booking');
+
+// Messaggio per l'assistente: motivo del rifiuto (con eventuali alternative già dentro il testo)
+const refuse = (res, r) => res.vapiError(r.message);
 
 // POST /vapi/reservations/create
 router.post('/reservations/create', vapiMiddleware, (req, res) => {
@@ -12,22 +16,14 @@ router.post('/reservations/create', vapiMiddleware, (req, res) => {
     if (!customer_name || !customer_phone || !date || !time || !guests) {
       return res.vapiError('Dati mancanti. Servono: nome cliente, telefono, data (YYYY-MM-DD), orario (HH:MM), numero ospiti.');
     }
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-      return res.vapiError('Data non valida. Usa il formato YYYY-MM-DD, ad esempio 2026-03-15.');
-    }
-    if (!/^\d{2}:\d{2}$/.test(time)) {
-      return res.vapiError('Orario non valido. Usa il formato HH:MM, ad esempio 20:30.');
-    }
 
-    const now = new Date().toISOString();
-    const result = db.prepare(`
-      INSERT INTO reservations (customer_name, customer_phone, date, time, guests, notes, status, created_at)
-      VALUES (?, ?, ?, ?, ?, ?, 'confirmed', ?)
-    `).run(customer_name, customer_phone, date, time, guests, notes, now);
+    // Controlla orari, chiusure, turni e assegna il tavolo: niente più overbooking
+    const r = booking.reserve({ customer_name, customer_phone, date, time, guests, notes });
+    if (!r.ok) return refuse(res, r);
 
-    const dateFormatted = new Date(date + 'T00:00:00').toLocaleDateString('it-IT', { day: 'numeric', month: 'long' });
-    const msg = `Prenotazione confermata! ${customer_name}, ${guests} ${guests === 1 ? 'persona' : 'persone'}, ${dateFormatted} alle ${time}. ID prenotazione: ${result.lastInsertRowid}.${notes ? ' Note: ' + notes : ''}`;
-    res.vapiSuccess(msg);
+    const n = parseInt(guests, 10);
+    const dateFormatted = booking.fmtDate(date);
+    res.vapiSuccess(`Prenotazione confermata! ${customer_name}, ${n} ${n === 1 ? 'persona' : 'persone'}, ${dateFormatted} alle ${time}. ID prenotazione: ${r.id}.${notes ? ' Note: ' + notes : ''}`);
   } catch (err) {
     res.vapiError('Errore interno: ' + err.message);
   }
@@ -76,12 +72,9 @@ router.post('/orders/create', vapiMiddleware, (req, res) => {
     if (!customer_name || !customer_phone || !pickup_date || !pickup_time) {
       return res.vapiError('Dati mancanti. Servono: nome cliente, telefono, data ritiro (YYYY-MM-DD), orario ritiro (HH:MM).');
     }
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(pickup_date)) {
-      return res.vapiError('Data non valida. Usa il formato YYYY-MM-DD.');
-    }
-    if (!/^\d{2}:\d{2}$/.test(pickup_time)) {
-      return res.vapiError('Orario non valido. Usa il formato HH:MM.');
-    }
+    // Orari di apertura, preparazione minima e limite di ordini per fascia
+    const slot = booking.checkTakeaway({ date: pickup_date, time: pickup_time });
+    if (!slot.ok) return refuse(res, slot);
     if (!Array.isArray(items) || items.length === 0) {
       return res.vapiError('Inserisci almeno un articolo nell\'ordine.');
     }
@@ -165,7 +158,7 @@ router.post('/reservations/list', vapiMiddleware, (req, res) => {
 router.post('/reservations/update', vapiMiddleware, (req, res) => {
   try {
     const p = req.vapiParams;
-    const { reservation_id, customer_phone, date: searchDate, date: newDate, time, guests, notes } = p;
+    const { customer_phone, date: searchDate } = p;
 
     let reservation = null;
     if (p.reservation_id) {
@@ -173,24 +166,27 @@ router.post('/reservations/update', vapiMiddleware, (req, res) => {
     } else if (customer_phone && searchDate) {
       reservation = db.prepare("SELECT * FROM reservations WHERE customer_phone = ? AND date = ? AND status = 'confirmed' ORDER BY time LIMIT 1").get(customer_phone, searchDate);
     }
-    if (!reservation) return res.vapiError('Prenotazione non trovata. Specifica ID oppure telefono e data.');
-
-    const updates = [];
-    const vals = [];
-    if (p.new_date)  { if (!/^\d{4}-\d{2}-\d{2}$/.test(p.new_date)) return res.vapiError('Data non valida. Usa YYYY-MM-DD.'); updates.push('date = ?');  vals.push(p.new_date); }
-    if (p.new_time)  { if (!/^\d{2}:\d{2}$/.test(p.new_time))  return res.vapiError('Orario non valido. Usa HH:MM.');      updates.push('time = ?');  vals.push(p.new_time); }
-    if (p.guests)    { updates.push('guests = ?'); vals.push(parseInt(p.guests)); }
-    if (p.notes !== undefined) { updates.push('notes = ?'); vals.push(p.notes); }
-
-    if (updates.length === 0) return res.vapiError('Nessun campo da aggiornare. Specifica new_date, new_time, guests o notes.');
-
-    vals.push(reservation.id);
-    db.prepare(`UPDATE reservations SET ${updates.join(', ')} WHERE id = ?`).run(...vals);
+    if (!reservation || !reservation.id) return res.vapiError('Prenotazione non trovata. Specifica ID oppure telefono e data.');
 
     const finalDate = p.new_date || reservation.date;
     const finalTime = p.new_time || reservation.time;
-    const df = new Date(finalDate + 'T00:00:00').toLocaleDateString('it-IT', { day: 'numeric', month: 'long' });
-    res.vapiSuccess(`Prenotazione ID ${reservation.id} aggiornata: ${reservation.customer_name}, ${df} alle ${finalTime}.`);
+    const finalGuests = p.guests ? parseInt(p.guests, 10) : reservation.guests;
+    const changesSlot = p.new_date || p.new_time || p.guests;
+
+    if (!changesSlot && p.notes === undefined) return res.vapiError('Nessun campo da aggiornare. Specifica new_date, new_time, guests o notes.');
+
+    // Se cambia data, orario o persone: riverifica le regole e riassegna il tavolo
+    let tableId = reservation.table_id;
+    if (changesSlot) {
+      const chk = booking.checkReservation({ date: finalDate, time: finalTime, guests: finalGuests, excludeId: reservation.id });
+      if (!chk.ok) return refuse(res, chk);
+      tableId = chk.table.id;
+    }
+
+    db.prepare('UPDATE reservations SET date = ?, time = ?, guests = ?, table_id = ?, notes = ? WHERE id = ?')
+      .run(finalDate, finalTime, finalGuests, tableId, p.notes !== undefined ? p.notes : reservation.notes, reservation.id);
+
+    res.vapiSuccess(`Prenotazione ID ${reservation.id} aggiornata: ${reservation.customer_name}, ${finalGuests} ${finalGuests === 1 ? 'persona' : 'persone'}, ${booking.fmtDate(finalDate)} alle ${finalTime}.`);
   } catch (err) {
     res.vapiError('Errore interno: ' + err.message);
   }
@@ -275,8 +271,12 @@ router.post('/orders/update', vapiMiddleware, (req, res) => {
 
     const updates = [];
     const vals = [];
-    if (p.new_pickup_date) { if (!/^\d{4}-\d{2}-\d{2}$/.test(p.new_pickup_date)) return res.vapiError('Data non valida. Usa YYYY-MM-DD.'); updates.push('pickup_date = ?'); vals.push(p.new_pickup_date); }
-    if (p.new_pickup_time) { if (!/^\d{2}:\d{2}$/.test(p.new_pickup_time)) return res.vapiError('Orario non valido. Usa HH:MM.'); updates.push('pickup_time = ?'); vals.push(p.new_pickup_time); }
+    if (p.new_pickup_date || p.new_pickup_time) {
+      const slot = booking.checkTakeaway({ date: p.new_pickup_date || order.pickup_date, time: p.new_pickup_time || order.pickup_time, excludeId: order.id });
+      if (!slot.ok) return refuse(res, slot);
+    }
+    if (p.new_pickup_date) { updates.push('pickup_date = ?'); vals.push(p.new_pickup_date); }
+    if (p.new_pickup_time) { updates.push('pickup_time = ?'); vals.push(p.new_pickup_time); }
     if (p.notes !== undefined) { updates.push('notes = ?'); vals.push(p.notes); }
 
     if (updates.length === 0) return res.vapiError('Nessun campo da aggiornare. Specifica new_pickup_date, new_pickup_time o notes.');
@@ -346,30 +346,33 @@ router.post('/availability', vapiMiddleware, (req, res) => {
     if (!date) {
       return res.vapiError('Specifica una data (YYYY-MM-DD) per verificare la disponibilità.');
     }
+    const n = guests ? parseInt(guests, 10) : 2;
+    const dateFormatted = booking.fmtDate(date);
 
-    const reservations = db.prepare(`
-      SELECT table_id FROM reservations
-      WHERE date = ? AND status = 'confirmed'
-      ${time ? "AND time = ?" : ""}
-    `).all(...(time ? [date, time] : [date]));
-
-    const reservedTableIds = reservations.map(r => r.table_id).filter(Boolean);
-
-    const allTables = db.prepare('SELECT * FROM tables WHERE active = 1').all();
-    let availableTables = allTables.filter(t => !reservedTableIds.includes(t.id));
-
-    if (guests) {
-      availableTables = availableTables.filter(t => t.capacity >= parseInt(guests));
+    if (time) {
+      const chk = booking.checkReservation({ date, time, guests: n });
+      if (!chk.ok) return refuse(res, chk);
+      return res.vapiSuccess(`Sì, il ${dateFormatted} alle ${time} c'è posto per ${n} ${n === 1 ? 'persona' : 'persone'}. Posso procedere con la prenotazione?`);
     }
 
-    const dateFormatted = new Date(date + 'T00:00:00').toLocaleDateString('it-IT', { day: 'numeric', month: 'long' });
+    // Senza orario: indica quando c'è posto (ogni mezz'ora)
+    const day = booking.checkReservation({ date, time: '12:00', guests: n });
+    if (['closed', 'bad_date', 'party_too_large', 'no_tables', 'bad_guests'].includes(day.code)) return refuse(res, day);
 
-    if (availableTables.length === 0) {
-      return res.vapiSuccess(`Non ci sono tavoli disponibili per ${guests ? guests + ' persone ' : ''}il ${dateFormatted}${time ? ' alle ' + time : ''}.`);
-    }
+    const free = booking.validStarts(date, booking.localNow())
+      .filter(t => t % 30 === 0 && booking.assignment(date, booking.fromMin(t), n).table)
+      .map(booking.fromMin);
+    if (free.length === 0) return res.vapiSuccess(`Il ${dateFormatted} non c'è più posto per ${n} ${n === 1 ? 'persona' : 'persone'}.`);
+    res.vapiSuccess(`Il ${dateFormatted} c'è posto per ${n} ${n === 1 ? 'persona' : 'persone'} alle ${free.slice(0, 8).join(', ')}${free.length > 8 ? ' e altri orari' : ''}. Quale preferisce?`);
+  } catch (err) {
+    res.vapiError('Errore interno: ' + err.message);
+  }
+});
 
-    const msg = `Ci sono ${availableTables.length} tavoli disponibili per ${guests ? guests + ' persone ' : ''}il ${dateFormatted}${time ? ' alle ' + time : ''}. Posso procedere con la prenotazione?`;
-    res.vapiSuccess(msg);
+// POST /vapi/hours  — orari di apertura, chiusure e regole di prenotazione/asporto
+router.post('/hours', vapiMiddleware, (req, res) => {
+  try {
+    res.vapiSuccess(booking.describeRules());
   } catch (err) {
     res.vapiError('Errore interno: ' + err.message);
   }

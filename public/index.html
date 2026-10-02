@@ -48,6 +48,10 @@
       <i class="ph-bold ph-shield-warning icon"></i>
       <span>Allergeni</span>
     </a>
+    <a data-view="regole">
+      <i class="ph-bold ph-clock icon"></i>
+      <span>Orari e regole</span>
+    </a>
     <a data-view="chiamate">
       <i class="ph-bold ph-phone-call icon"></i>
       <span>Chiamate</span>
@@ -352,6 +356,50 @@
     </div>
   </section>
 
+
+  <!-- ══ ORARI E REGOLE ══ -->
+  <section id="view-regole" class="view">
+    <div class="view-header">
+      <h2>Orari e regole</h2>
+      <button class="btn btn-primary" onclick="saveRules()"><i class="ph-bold ph-floppy-disk"></i> Salva</button>
+    </div>
+    <div class="alert-note" id="rules-banner" style="display:none"></div>
+
+    <div class="card">
+      <div class="card-header"><h3>Orari di apertura</h3></div>
+      <div class="card-body">
+        <p class="rules-hint">Lascia vuote le fasce dei giorni di chiusura. L'assistente e le prenotazioni rispettano questi orari.</p>
+        <table class="data-table hours-table">
+          <thead><tr><th>Giorno</th><th>Fascia 1 (es. pranzo)</th><th>Fascia 2 (es. cena)</th></tr></thead>
+          <tbody id="hours-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><h3>Prenotazioni e asporto</h3></div>
+      <div class="card-body rules-grid">
+        <div class="form-group"><label>Durata di un turno al tavolo (minuti)</label><input id="rule-TURN_MINUTES" type="number" min="15" max="360"></div>
+        <div class="form-group"><label>Preavviso minimo per prenotare (minuti)</label><input id="rule-RES_LEAD_MINUTES" type="number" min="0" max="1440"></div>
+        <div class="form-group"><label>Ultima prenotazione prima della chiusura (minuti)</label><input id="rule-LAST_SEATING_MINUTES" type="number" min="0" max="240"></div>
+        <div class="form-group"><label>Preparazione asporto (minuti)</label><input id="rule-TAKEAWAY_PREP_MINUTES" type="number" min="0" max="240"></div>
+        <div class="form-group"><label>Ordini asporto massimi ogni 15 minuti</label><input id="rule-TAKEAWAY_MAX_PER_SLOT" type="number" min="1" max="50"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><h3>Chiusure straordinarie (ferie, festività)</h3></div>
+      <div class="card-body">
+        <div id="closures-list" class="closures-list"></div>
+        <div class="closure-add">
+          <div class="form-group"><label>Dal</label><input id="closure-from" type="date"></div>
+          <div class="form-group"><label>Al (opzionale)</label><input id="closure-to" type="date"></div>
+          <div class="form-group"><label>Motivo</label><input id="closure-reason" type="text" maxlength="80" placeholder="Ferie estive"></div>
+          <button class="btn btn-outline" onclick="addClosure()"><i class="ph-bold ph-plus"></i> Aggiungi</button>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <!-- ══ CHIAMATE ══ -->
   <section id="view-chiamate" class="view">
@@ -802,6 +850,7 @@
 <div id="toast-container"></div>
 
 <script src="voice.js"></script>
+<script src="rules.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

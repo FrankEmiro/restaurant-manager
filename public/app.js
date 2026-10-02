@@ -59,7 +59,7 @@ function toast(msg, type = 'success') {
   el.className = `toast ${type}`;
   el.textContent = msg;
   document.getElementById('toast-container').appendChild(el);
-  setTimeout(() => el.remove(), 3500);
+  setTimeout(() => el.remove(), Math.max(3500, String(msg).length * 70));
 }
 
 function formatDate(d) {
@@ -147,6 +147,7 @@ function loadView(view) {
     case 'allergeni': loadAllergens(); break;
     case 'agenda':        loadAgenda();      break;
     case 'segnalazioni':  loadComplaints();  break;
+    case 'regole':        loadRules();       break;
     case 'chiamate':      loadCalls();       break;
     case 'voce':          loadVoice();       break;
   }
@@ -836,7 +837,7 @@ async function submitOrder() {
     .map(cb => parseInt(cb.value));
 
   try {
-    await apiFetch('/api/orders', {
+    const created = await apiFetch('/api/orders', {
       method: 'POST',
       body: {
         customer_name: name,
@@ -850,6 +851,7 @@ async function submitOrder() {
     });
     closeModal('modal-order');
     toast('Ordine creato!');
+    if (created.warning) toast('Attenzione: ' + created.warning, 'info');
     if (activeView === 'dashboard') loadDashboard();
     if (activeView === 'cucina') renderKitchen();
   } catch (e) {
@@ -895,14 +897,14 @@ async function submitReservation() {
     toast('Compila tutti i campi obbligatori', 'error'); return;
   }
   try {
-    if (id) {
-      await apiFetch(`/api/reservations/${id}`, { method: 'PATCH', body });
-    } else {
-      await apiFetch('/api/reservations', { method: 'POST', body });
-    }
+    const saved = id
+      ? await apiFetch(`/api/reservations/${id}`, { method: 'PATCH', body })
+      : await apiFetch('/api/reservations', { method: 'POST', body });
     closeModal('modal-reservation');
     if (activeView === 'dashboard') loadDashboard();
+    if (activeView === 'mappa') loadMap();
     toast(id ? 'Prenotazione aggiornata' : 'Prenotazione creata!');
+    if (saved.warning) toast('Attenzione: ' + saved.warning, 'info');
   } catch (e) {
     toast('Errore: ' + e.message, 'error');
   }

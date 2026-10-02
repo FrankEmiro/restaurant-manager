@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
+const booking = require('../lib/booking');
 
 const getAllergens = db.prepare('SELECT * FROM order_allergens WHERE order_id = ?');
 
@@ -53,6 +54,10 @@ router.post('/', (req, res) => {
     return res.status(400).json({ error: 'Inserisci almeno un articolo negli items' });
   }
 
+  // Lo staff ha sempre l'ultima parola (cliente al banco, eccezioni): le regole non bloccano,
+  // ma l'app avvisa se l'ordine esce da orari, preparazione minima o capacità della cucina.
+  const slotCheck = booking.checkTakeaway({ date: pickup_date, time: pickup_time });
+
   // Calculate total and validate items
   let total = 0;
   const resolvedItems = [];
@@ -94,7 +99,9 @@ router.post('/', (req, res) => {
     }
     return orderId;
   });
-  res.status(201).json(getOrderWithItems(orderId));
+  const created = getOrderWithItems(orderId);
+  if (!slotCheck.ok) created.warning = slotCheck.message;
+  res.status(201).json(created);
 });
 
 // GET /api/orders/:id
