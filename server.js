@@ -86,6 +86,8 @@ app.use('/api/complaints',   require('./routes/complaints'));
 app.use('/api/security',     require('./routes/security'));
 app.use('/api/voice',        require('./routes/voice'));
 app.use('/api/rules',        require('./routes/rules'));
+app.use('/api/alerts',       require('./routes/alerts'));
+app.use('/print',            require('./routes/print'));
 
 // 7. VAPI routes (fuori dalla sessione, protette dal segreto condiviso)
 app.use('/vapi', verifyVapiSecret, require('./routes/vapi'));

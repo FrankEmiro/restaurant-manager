@@ -218,6 +218,7 @@ async function loadDashboard() {
           <td>
             <div class="row-actions">
               ${nextStatus[o.status] ? `<button class="btn-icon" title="${nextLabel[o.status]}" onclick="advanceOrderStatus(${o.id},'${nextStatus[o.status]}')"><i class="ph-bold ${nextIcon[o.status]}"></i></button>` : ''}
+              <button class="btn-icon" title="Stampa comanda" onclick="printTicket(${o.id})"><i class="ph-bold ph-printer"></i></button>
               <button class="btn-icon danger" title="Elimina" onclick="deleteOrder(${o.id})"><i class="ph-bold ph-trash"></i></button>
             </div>
           </td>
@@ -325,7 +326,7 @@ async function renderKitchen() {
           ${allergenBanner}
           ${o.notes ? `<div class="kc-notes"><i class="ph-bold ph-note"></i> ${esc(o.notes)}</div>` : ''}
           <div class="kc-items">${items}</div>
-          <div class="kc-actions">${actions}</div>
+          <div class="kc-actions">${actions}<button class="btn btn-outline kc-print" title="Stampa comanda" onclick="printTicket(${o.id})"><i class="ph-bold ph-printer"></i></button></div>
         </div>`;
     }).join('');
   } catch (e) {

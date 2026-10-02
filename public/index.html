@@ -66,6 +66,7 @@
     </a>
   </nav>
   <div class="sidebar-footer">
+    <button class="btn-theme" id="sound-btn" onclick="toggleSound()" title="Avviso sonoro per nuovi ordini e prenotazioni"></button>
     <button class="btn-theme" id="theme-btn" onclick="toggleTheme()"></button>
     <button class="btn-logout" onclick="logout()">
       <i class="ph-bold ph-sign-out"></i>
@@ -82,6 +83,9 @@
     <div class="view-header">
       <h2>Dashboard</h2>
       <div style="display:flex;gap:8px">
+        <button class="btn btn-outline" onclick="printDaySheet()" title="Prenotazioni e asporto di oggi, da stampare">
+          <i class="ph-bold ph-printer"></i> Foglio del giorno
+        </button>
         <button class="btn btn-outline" onclick="openAddReservationModal()">
           <i class="ph-bold ph-calendar-plus"></i> Prenotazione
         </button>
@@ -167,6 +171,9 @@
       </h2>
       <div style="display:flex;align-items:center;gap:12px">
         <span class="kitchen-meta" id="kitchen-last-update"></span>
+        <button class="btn btn-outline" onclick="printPendingTickets()" title="Stampa le comande degli ordini in attesa">
+          <i class="ph-bold ph-printer"></i> Stampa in attesa
+        </button>
         <button class="btn btn-outline" onclick="renderKitchen()">
           <i class="ph-bold ph-arrows-clockwise"></i> Aggiorna
         </button>
@@ -311,6 +318,7 @@
         <button class="btn btn-primary" onclick="loadAgendaReservations()">
           <i class="ph-bold ph-magnifying-glass"></i> Cerca
         </button>
+        <button class="btn btn-outline" onclick="printDaySheet(document.getElementById('agenda-res-from').value)" title="Stampa il foglio del giorno della data iniziale"><i class="ph-bold ph-printer"></i> Foglio del giorno</button>
       </div>
       <div class="card" style="padding:0;overflow-x:auto">
         <table class="data-table">
@@ -851,6 +859,7 @@
 
 <script src="voice.js"></script>
 <script src="rules.js"></script>
+<script src="alerts.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
